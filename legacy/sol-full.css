@@ -1,0 +1,97 @@
+#table {
+	max-width: 1300px;
+}
+
+.top-section {
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+
+#main-deck {
+	margin-left: 15px;
+	margin-right: 10px;
+}
+
+#main-pile {
+	width: 235px;
+	height: 215px;
+}
+
+#main-pile .card:nth-last-child(-n+3) {
+	width: 23px;
+}
+
+#main-pile .card {
+	width: 2px;
+}
+
+.pile {
+	width: 150px;
+	height: 220px;
+}
+
+.pile .card {
+	height: 0.3px;
+}
+
+#suit-stacks {
+	height: 215px;
+}
+
+#suit-stacks .stack {
+	margin-right: 5px;
+}
+
+#suit-stacks .stack .card {
+	height: 1.5px;
+}
+
+.stack {
+	width: 145px;
+	height: 215px;
+}
+
+#stacks .stack .card {
+	height: 7px;
+}
+
+#stacks .stack .card-flipped {
+	height: 35px;
+}
+
+#selected-cards {
+	width: 142px;
+	height: 215px;
+	border-radius: 12px;
+}
+
+#selected-cards .card {
+	height: 31px;
+}
+
+.card {
+	width: 142px;
+	height: 215px;
+	perspective: 600px;
+}
+
+.card-part {
+	border-radius: 12px;
+	width: 142px;
+	height: 215px;
+}
+
+.card-back {
+	background-size: 108%;
+}
+
+.card-front {
+	background-size: 1861px 865px;
+	top: -215px;
+}
+
+.button {
+	padding: 15px 32px;
+	font-size: 16px;
+}
+

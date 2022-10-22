@@ -1,0 +1,151 @@
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	text-align: center;
+	background-color: rgb(39, 27, 16);
+	background-image: url("table.jpg");
+	user-select: none;
+}
+
+.button {
+	background-color: rgb(88 40 15 / 34%);
+	border: none;
+	color: white;
+	padding: 15px 32px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	cursor: pointer;
+}
+
+.button:hover {
+	opacity: 0.9;
+}
+
+.button:active {
+	opacity: 0.5;
+}
+
+#score-bar {
+	position: absolute;
+	background-color: rgb(0 0 0 / 10%);
+	color: #ffffff;
+	width: 100%;
+	top: 0px;
+}
+
+.score-row {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.score-toggle {
+	font-size: 20px;
+	font-weight: bold;
+}
+
+#table {
+	display: inline-block;
+	height: 100%;
+	width: 100%;
+	text-align: left;
+}
+
+#main-deck {
+	display: inline-block;
+	background-color: rgba( 240, 128, 128, 0.1 );
+}
+
+#main-pile {
+	display: inline-block;
+}
+
+.pile .card {
+	position: relative;
+	display: block;
+}
+
+#suit-stacks {
+	text-align: right;
+	float: right;
+}
+
+#stacks {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-evenly;
+}
+
+.stack {
+	display: inline-block;
+	background-color: rgba( 240, 128, 128, 0.1 );
+	font-size: 0;
+	vertical-align: top;
+}
+
+#selected-cards {
+	display: none;
+}
+
+.can-drop-card {
+	box-shadow: 0px 0px 20px 6px rgb(0 200 0 / 50%);
+	background-color: rgb(0 200 0 / 50%);
+}
+
+.card {
+	display: inline-block;
+	transition-timing-function: ease-in-out;
+}
+
+.card-part {
+	border: 1px solid rgba(15,15,65,0.5);
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
+	transition-timing-function: ease-in-out;
+}
+
+.card-back {
+	background-image: url("card_back.svg");
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.card-flipped .card-back {
+	transform: rotateY(180deg);
+}
+
+.card-front {
+	transform: rotateY(-180deg);
+	background-image: url("cards.png");
+	position: relative;
+}
+
+.card-flipped .card-front {
+	transform: rotateY(0deg);
+}
+
+
+
+/*
+#score-bar {
+	height: 48px;
+}
+*/
+
+#score-bar span {
+	padding: 10px 15px;
+	font-size: 24px;
+}
+
+#score-bar-placeholder {
+	display: block;
+	height: 48px;
+}
+
+#score-toggle {
+	display: block;
+}
