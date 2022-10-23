@@ -1,4 +1,4 @@
-let ui = ( function () {
+let g_ui = ( function () {
 	"use strict";
 	
 	return {

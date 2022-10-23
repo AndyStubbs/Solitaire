@@ -2,22 +2,65 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Solitaire</title>
+	<link rel="stylesheet" href="styles/cards.css" type="text/css" />
+	<link rel="stylesheet" href="styles/cards-full.css" type="text/css" />
+	<link rel="stylesheet" href="styles/cards-sizes.css" type="text/css" />
+	<script
+		src="https://code.jquery.com/jquery-3.6.1.min.js"
+		integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
+		crossorigin="anonymous">
+	</script>
 </head>
-
 <body>
-  Hello world
-  <script src="script.js"></script>
-
- <!--
-  This script places a badge on your repl's full-browser view back to your repl's cover
-  page. Try various colors for the theme: dark, light, red, orange, yellow, lime, green,
-  teal, blue, blurple, magenta, pink!
-  -->
-  <script src="https://replit.com/public/js/replit-badge.js" theme="blue" defer></script> 
+	<div id="menu">
+		<div>
+			<h1>Solitaire</h1>
+			<input id="btn-start" type="button" value="Start Game" class="button" />
+		</div>
+	</div>
+	<img src="cards.png" style="display: none;" alt="no show" />
+	<img src="card_back.svg" style="display: none;" alt="no show" />
+	<style id="custom-styles"></style>
+	<div id="table">
+		<div id="score-bar-placeholder"></div>
+		<div class="top-section">
+			<div id="main-deck" class="pile deck" data-target="main-pile"></div>
+			<div id="main-pile"></div>
+			<div id="suit-stacks">
+				<div id="suit-1" class="stack suit-stack"></div>
+				<div id="suit-2" class="stack suit-stack"></div>
+				<div id="suit-3" class="stack suit-stack"></div>
+				<div id="suit-4" class="stack suit-stack"></div>
+			</div>
+		</div>
+		<div id="stacks">
+			<div id="stack-1" class="stack"></div>
+			<div id="stack-2" class="stack"></div>
+			<div id="stack-3" class="stack"></div>
+			<div id="stack-4" class="stack"></div>
+			<div id="stack-5" class="stack"></div>
+			<div id="stack-6" class="stack"></div>
+			<div id="stack-7" class="stack"></div>
+		</div>
+		<div id="selected-cards"></div>
+		<div id="card-placeholder" class="card" style="display: none;"></div>
+	</div>
+	<div id="score-bar">
+		<div class="score-row">
+			<input type="button" value="Menu" class="button" />
+			<span id="score">Score: 110</span>
+			<span id="timer">Time: 14</span>
+		</div>
+		<div id="score-toggle">&#9661;</div>
+	</div>
+	<script src="src/util.js"></script>
+	<script src="src/cards.js"></script>
+	<script src="src/ui.js"></script>
+	<script src="src/sol.js"></script>
+	<script src="src/menu.js"></script>
 </body>
 
 </html>

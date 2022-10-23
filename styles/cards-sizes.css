@@ -1,0 +1,192 @@
+@media screen and (min-width: 780px) and (max-width: 1160px), (min-height: 480px) and (max-height: 680px) {
+
+	#table {
+		max-width: 975px;
+	}
+	
+	.top-section {
+		margin-top: 11.25px;
+		margin-bottom: 11.25px;
+	}
+	
+	#main-deck {
+		margin-left: 11.25px;
+		margin-right: 7.5px;
+	}
+	
+	#main-pile {
+		width: 176.28px;
+		height: 161.25px;
+	}
+	
+	#main-pile .card:nth-last-child(-n+3) {
+		width: 17.25px;
+	}
+	
+	#main-pile .card {
+		width: 1.5px;
+	}
+	
+	.pile {
+		width: 112.5px;
+		height: 165px;
+	}
+	
+	.pile .card {
+		height: 0.225px;
+	}
+	
+	#suit-stacks {
+		height: 161.25px;
+	}
+	
+	#suit-stacks .stack {
+		margin-right: 3.75px;
+	}
+	
+	#suit-stacks .stack .card {
+		height: 1.25px;
+	}
+	
+	.stack {
+		width: 108.75px;
+		height: 161.25px;
+	}
+	
+	#stacks .stack .card {
+		height: 5.25px;
+	}
+	
+	#stacks .stack .card-flipped {
+		height: 26.25px;
+	}
+	
+	#selected-cards {
+		width: 106.5px;
+		height: 161.25px;
+		border-radius: 12px;
+	}
+	
+	#selected-cards .card {
+		height: 23.25px;
+	}
+	
+	.card {
+		width: 106.5px;
+		height: 161.25px;
+		perspective: 600px;
+	}
+	
+	.card-part {
+		border-radius: 9px;
+		width: 106.5px;
+		height: 161.25px;
+	}
+	
+	.card-back {
+		background-size: 108%;
+	}
+	
+	.card-front {
+		background-size: 1395.75px 648.75px;
+		top: -161.25px;
+	}
+
+	.button {
+		padding: 15px 32px;
+		font-size: 16px;
+	}
+
+}
+
+@media screen and (max-width: 779px), (max-height: 479px) {
+
+	#table {
+		max-width: 900px;
+	}
+
+	.top-section {
+		margin-top: 7.5px;
+		margin-bottom: 7.5px;
+	}
+
+	#main-deck {
+		margin-left: 7.5px;
+		margin-right: 5px;
+	}
+
+	#main-pile {
+		width: 78.5px;
+		height: 107.5px;
+	}
+
+	#main-pile .card:nth-last-child(-n+3) {
+		width: 11.5px;
+	}
+
+	#main-pile .card {
+		width: 1px;
+	}
+
+	.pile {
+		width: 75px;
+		height: 110px;
+	}
+
+	.pile .card {
+		height: 0.3px;
+	}
+
+	#suit-stacks {
+		height: 107.5px;
+	}
+
+	#suit-stacks .stack {
+		margin-right: 2.5px;
+	}
+
+	#suit-stacks .stack .card {
+		height: 1px;
+	}
+
+	.stack {
+		width: 72.5px;
+		height: 107.5px;
+	}
+
+	#stacks .stack .card {
+		height: 3.5px;
+	}
+
+	#stacks .stack .card-flipped {
+		height: 17.5px;
+	}
+
+	#selected-cards {
+		width: 71px;
+		height: 107.5px;
+		border-radius: 6px;
+	}
+
+	#selected-cards .card {
+		height: 13.5px;
+	}
+
+	.card {
+		width: 71px;
+		height: 107.5px;
+		perspective: 600px;
+	}
+
+	.card-part {
+		border-radius: 6px;
+		width: 71px;
+		height: 107.5px;
+	}
+
+	.card-front {
+		background-size: 930.5px 432.5px;
+		top: -107.5px;
+	}
+
+}

@@ -4,7 +4,7 @@
 ♥	&#9829;	&hearts;	BLACK HEART SUIT	
 ♦	&#9830;	&diams;		BLACK DIAMOND SUIT
 */
-let cards = ( function () {
+let g_cards = ( function () {
 	"use strict";
 
 	const SUITS = [
