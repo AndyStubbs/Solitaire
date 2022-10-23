@@ -5,6 +5,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
 	<title>Solitaire</title>
+	<link rel="stylesheet" href="styles/menu.css" type="text/css" />
 	<link rel="stylesheet" href="styles/cards.css" type="text/css" />
 	<link rel="stylesheet" href="styles/cards-full.css" type="text/css" />
 	<link rel="stylesheet" href="styles/cards-sizes.css" type="text/css" />
@@ -16,9 +17,28 @@
 </head>
 <body>
 	<div id="menu">
-		<div>
+		<div id="menu-main">
 			<h1>Solitaire</h1>
 			<input id="btn-start" type="button" value="Start Game" class="button" />
+			<input id="btn-settings" type="button" value="Settings" class="button" />
+		</div>
+		<div id="menu-settings">
+			<p>
+				<label>Draw</label>
+				<select id="select-draw">
+					<option>One</option>
+					<option>Three</option>
+				</select>
+			</p>
+			<p>
+				<label>Scoring</label>
+				<select id="select-score">
+					<option>Standard</option>
+					<option>Vegas</option>
+				</select>
+			</p>
+			<input id="btn-ok" type="button" value="Ok" class="button" />
+			<input id="btn-cancel" type="button" value="Cancel" class="button" />
 		</div>
 	</div>
 	<img src="cards.png" style="display: none;" alt="no show" />

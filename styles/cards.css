@@ -9,26 +9,6 @@ html, body {
 	user-select: none;
 }
 
-.button {
-	background-color: rgb(88 40 15 / 34%);
-	border: none;
-	color: white;
-	padding: 15px 32px;
-	text-align: center;
-	text-decoration: none;
-	display: inline-block;
-	font-size: 16px;
-	cursor: pointer;
-}
-
-.button:hover {
-	opacity: 0.9;
-}
-
-.button:active {
-	opacity: 0.5;
-}
-
 #score-bar {
 	position: absolute;
 	background-color: rgb(0 0 0 / 10%);
@@ -150,32 +130,3 @@ html, body {
 	display: block;
 }
 
-#menu {
-	z-index: 1;
-	display: none;
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	color: white;
-	background-color: rgb(39, 27, 16);
-	background-image: url("../img/table.jpg");
-}
-
-#menu div {
-	margin: auto;
-	height: 220px;
-	transform: translateY(-50%);
-	position: absolute;
-	width: 100%;
-	top: 50%;
-}
-
-#menu h1 {
-	font-size: 48pt;
-}
-
-#menu .button {
-	background-color: rgb(88 40 15);
-}

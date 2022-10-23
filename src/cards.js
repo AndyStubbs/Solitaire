@@ -38,7 +38,7 @@ let g_cards = ( function () {
 		return {
 			"id": id,
 			"value": id % 13,
-			"suit": suit.
+			"suit": suit,
 			"color": color
 		};
 	}
