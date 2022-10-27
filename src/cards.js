@@ -24,12 +24,15 @@ let g_cards = ( function () {
 		"addLogger": addLogger
 	};
 	
-	function createDeck() {
+	function createDeck( isShuffled ) {
 		let deck = [];
 		for( let i = 0; i < 52; i++ ) {
 			deck.push( createCard( i ) );
 		}
-		return shuffleDeck( deck );
+		if( isShuffled ) {
+			return shuffleDeck( deck );
+		}
+		return deck;
 	}
 	
 	function createCard( id ) {
