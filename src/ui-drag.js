@@ -39,6 +39,14 @@ let g_uiDrag = (function() {
 	}
 
 	function resetDrag() {
+		if( jQuery.prototype.isPrototypeOf( m_$dragged ) && m_$dragged.length > 0 ) {
+			m_$dragged.removeClass( "dragged-item" );
+			m_$dragged.removeClass( "can-drop-card" );
+			m_$dragged
+				.css( "position", "" )
+				.css( "left", "" )
+				.css( "top", "" );
+		}
 		m_$dragged = null;
 		m_startDrag = false;
 		m_canStartDrag = true;
@@ -49,9 +57,7 @@ let g_uiDrag = (function() {
  	*/
 
 	function startDrag() {
-		//console.log( "START DRAG" );
 		if( ! m_canStartDrag ) {
-			//console.log( "---SKIPPED" );
 			return;
 		}
 
@@ -69,7 +75,7 @@ let g_uiDrag = (function() {
 	}
 
 	function dragMove( e ) {
-		var mouse, offset, newLeft, newTop, $elements, $stack;
+		var mouse, offset, newLeft, newTop;
 
 		mouse = {
 			"x": e.clientX,
@@ -88,6 +94,8 @@ let g_uiDrag = (function() {
 			m_$dragged.css( "left", m_dragStartPosition.left );
 			m_$dragged.css( "top", m_dragStartPosition.top );
 			m_$dragged.css( "position", "absolute" );
+			m_$dragged.addClass( "dragged-item" );
+
 			$( document.body ).append( m_$dragged );
 			m_canStartDrag = false;
 		}
@@ -101,7 +109,12 @@ let g_uiDrag = (function() {
 			m_$dragged.css( "top", newTop );
 
 			// Detect if can drop card
-			m_$dragged.hide();
+			if( getCardOverStack() ) {
+				m_$dragged.addClass( "can-drop-card" );
+			} else {
+				m_$dragged.removeClass( "can-drop-card" );
+			}
+			/*m_$dragged.hide();
 			$elements = $( document.elementFromPoint( mouse.x, mouse.y ) );
 			m_$dragged.show();
 			$stack = $elements.closest( "." + m_stackClass );
@@ -109,7 +122,7 @@ let g_uiDrag = (function() {
 				m_$dragged.addClass( "can-drop-card" );
 			} else {
 				m_$dragged.removeClass( "can-drop-card" );
-			}
+			}*/
 		}
 
 		m_mouse = mouse;
@@ -129,22 +142,23 @@ let g_uiDrag = (function() {
 	}
 
 	function stopDrag() {
-		var $elements, $stack, pos, $placeholder;
+		var $elements, stacks, stack, $stack, pos, $placeholder;
 
-		//console.log( "STOP DRAG" );
 		if( ! m_$dragged || ! m_dragStartPosition || m_startDrag ) {
-			//console.log( "---SKIPPED" );
-			m_$dragged = null;
-			m_startDrag = false;
+			resetDrag();
 			return;
 		}
 		m_startDrag = false;
 		m_isDragging = false;
-		m_$dragged.hide();
-		$elements = $( document.elementFromPoint( m_mouse.x, m_mouse.y ) );
-		m_$dragged.show();
-		$stack = $elements.closest( ".stack" );
-		if( $stack.length > 0 && m_canPlaceCardCmd( $stack, m_$dragged ) ) {
+
+		stacks = getCardOverStack( true );
+		if( stacks.length > 0 ) {
+			if( stacks.length === 1 ) {
+				stack = stacks[ 0 ];
+			} else {
+				stack = g_util.findNearestElementFromList( stacks, m_mouse.x, m_mouse.y );
+			}
+			$stack = $( stack );
 			$placeholder = $( "#card-placeholder" );
 			$stack.append( $placeholder );
 			$placeholder.show();
@@ -154,7 +168,7 @@ let g_uiDrag = (function() {
 			moveToStack( $stack, pos );
 		} else {
 			moveToStack( m_$dragCancelParent, m_dragStartPosition );
-		}
+		}		
 	}
 
 	function touchEnd() {
@@ -207,16 +221,41 @@ let g_uiDrag = (function() {
 			} else {
 				$stack.append( m_$dragged );
 			}
-			m_$dragged
-				.css( "position", "" )
-				.css( "left", "" )
-				.css( "top", "" );
-			m_$dragged.removeClass( "can-drop-card" );
-			m_$dragged = null;
-			m_canStartDrag = true;
 			m_isAnimating = false;
+			resetDrag();
 			m_onCardPlacedCmd();
 		} );
+	}
+
+	function getCardOverStack( checkAll ) {
+		let $allStacks = $( "." + m_stackClass );
+		let foundStacks = [];
+
+		for( let i = 0; i < $allStacks.length; i++ ) {
+			let stack = $allStacks.get( i );
+			let $card = $( stack ).find( ".card-flipped:nth-last-child(1)" );
+			let overlapElement;
+			if( $card.length === 0 ) {
+				overlapElement = stack;
+			} else {
+				overlapElement = $card.find( ".card-part" ).get( 0 );
+			}
+			if( g_util.areElementsOverlapped( m_$dragged.get( 0 ), overlapElement ) ) {
+				let $stack = $( stack );
+				if( $stack.length > 0 && m_canPlaceCardCmd( $stack, m_$dragged ) ) {
+					if( checkAll ) {
+						foundStacks.push( $stack.get( 0 ) );
+					} else {
+						return $stack;
+					}
+				}
+			}
+		}
+
+		if( checkAll ) {
+			return foundStacks;
+		}
+		return false;
 	}
 
 } )();

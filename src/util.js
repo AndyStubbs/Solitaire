@@ -2,9 +2,11 @@ let g_util = (function() {
 	return {
 		"isFunction": isFunction,
 		"isMobile": isMobile,
-		"openFullscreen": openFullscreen
+		"openFullscreen": openFullscreen,
+		"areElementsOverlapped": areElementsOverlapped,
+		"findNearestElementFromList": findNearestElementFromList
 	};
-	
+
 	function isFunction( functionToCheck ) {
 		return functionToCheck && 
 			{}.toString.call( functionToCheck ) === '[object Function]';
@@ -33,6 +35,37 @@ let g_util = (function() {
 		} else if ( elem.msRequestFullscreen ) { /* IE11 */
 			elem.msRequestFullscreen();
 		}
+	}
+
+	function areElementsOverlapped( elem1, elem2 ) {
+  		const rect1 = elem1.getBoundingClientRect();
+		const rect2 = elem2.getBoundingClientRect();
+
+		return !(
+			rect1.top > rect2.bottom ||
+			rect1.bottom < rect2.top ||
+			rect1.left > rect2.right ||
+			rect1.right < rect2.left
+		);
+	}
+
+	function findNearestElementFromList( elements, x, y ) {
+		let maxDist = 99999;
+		let element = elements[ 0 ];
+		for( let i = 0; i < elements.length; i++ ) {
+			let rect = elements[ i ].getBoundingClientRect();
+			let mx = rect.left + Math.round( rect.width / 2 );
+			let my = rect.top + Math.round( rect.height / 2 );
+			let dx = x - mx;
+			let dy = y - my;
+			let d = Math.sqrt( dx * dx + dy * dy );
+			if( d < maxDist ) {
+				maxDist = d;
+				element = elements [ i ];
+			}
+		}
+
+		return element;
 	}
 
 })();

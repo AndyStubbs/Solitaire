@@ -42,6 +42,7 @@ let g_sol = ( function () {
 		);
 		$( window ).on( "resize", onWindowResize );
 	}
+
 	/*
  		Event Functions
  	*/
