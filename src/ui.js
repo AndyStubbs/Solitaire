@@ -1,76 +1,20 @@
 let g_ui = (function() {
 	"use strict";
 
-	let m_speed = 300;
+	let m_speed = 150;
 	let m_animations = 0;
-	let m_delay = 150;
+	let m_delay = 75;
 	let m_onCompleteCommands = [];
+	let m_deckClickedParams;
 
 	return {
-		"resize": resize,
 		"createDeck": createDeck,
 		"dealCard": dealCard,
 		"flipCard": flipCard,
-		"onComplete": onComplete
+		"onComplete": onComplete,
+		"setupDeckClick": setupDeckClick,
+		"setSpeed": setSpeed
 	};
-
-	function resize() {
-		var $table, i, size, left, style, cardWidth, cardHeight, cardPadding, names, width, height;
-
-		$table = $("#table");
-
-		// Get Width and height
-		width = $table.width();
-		height = $table.height();
-
-		// Compute Pile Margins
-		size = 0.25;
-		left = 0;
-		style = "";
-		for (i = 2; i < 53; i++) {
-			left += size;
-			style += ".pile .card:nth-child(" + i + "){margin-left:" + left + "px;} ";
-		}
-
-		// Compute background positions
-		cardWidth = 142;
-		cardHeight = 215;
-		cardPadding = 1;
-
-		if (width < 780 || height < 480) {
-			cardWidth *= 0.5;
-			cardHeight *= 0.5;
-			cardPadding *= 0.5;
-		} else if (width < 1160 || height < 680) {
-			cardWidth *= 0.75;
-			cardHeight *= 0.75;
-			cardPadding *= 0.75;
-		}
-
-		// Compute Card Background Positions Y
-		names = ["card-spades", "card-hearts", "card-diamonds", "card-clubs"];
-		size = -cardPadding;
-		for (i = 0; i < names.length; i++) {
-			style += "." + names[i] + "{background-position-y: " + size + "px; }";
-			size += -(cardPadding + cardHeight);
-		}
-
-		// Compute Card Background Position X
-		names = [
-			"card-a", "card-2", "card-3", "card-4", "card-5", "card-6", "card-7",
-			"card-8", "card-9", "card-10", "card-j", "card-q", "card-k"
-		];
-		size = -cardPadding;
-		for (i = 0; i < names.length; i++) {
-			style += "." + names[i] + "{background-position-x: " + size + "px; }"
-			size += -(cardPadding + cardWidth);
-		}
-
-		// Add to custom styles
-		$("#custom-styles").html(style);
-
-		g_menu.resize(height);
-	}
 
 	function createDeck(deck, $dest) {
 		for (let i = 0; i < deck.length; i++) {
@@ -79,9 +23,11 @@ let g_ui = (function() {
 		}
 	}
 
-	function dealCard($src, $dest) {
-		runDealCardAnimation($src, $dest);
-		m_animations += 1;
+	function dealCard($src, $dest, isFlip, noDelay) {
+		runDealCardAnimation($src, $dest, isFlip, noDelay);
+		if(!noDelay) {
+			m_animations += 1;	
+		}
 	}
 
 	function flipCard($src) {
@@ -92,7 +38,31 @@ let g_ui = (function() {
 	function onComplete(cmd) {
 		m_onCompleteCommands.push(cmd);
 	}
-	
+
+	function setupDeckClick($src, $dest, onEmptyCmd) {
+		m_deckClickedParams = [ $src, $dest, onEmptyCmd ];
+		$src.on("click", deckClicked);
+	}
+
+	function setSpeed(speed) {
+		m_speed = speed;
+		$( ".card-part" ).css( "transition-duration", ( m_speed / 1000 ) + "s" );
+	}
+
+	function deckClicked() {
+		let $src, $dest, onEmptyCmd;
+		$src = m_deckClickedParams[ 0 ];
+		$dest = m_deckClickedParams[ 1 ];
+		onEmptyCmd = m_deckClickedParams[ 2 ];
+		
+		if ($src.children().length === 0) {
+			onEmptyCmd();
+			return;
+		}
+
+		dealCard($src, $dest, true);
+	}
+
 	function createCard(value) {
 		var $card, cardValue, cardSuit;
 
@@ -138,7 +108,7 @@ let g_ui = (function() {
 		return "card-" + value;
 	}
 
-	function runDealCardAnimation($src, $dest) {
+	function runDealCardAnimation($src, $dest, isFlip, noDelay) {
 		setTimeout(function() {
 			var $card, sourceOffset, destOffset;
 
@@ -170,8 +140,16 @@ let g_ui = (function() {
 					.css("position", "")
 					.css("left", "")
 					.css("top", "");
-				animationCompleted();
+				animationCompleted(noDelay);
 			});
+
+			if (isFlip) {
+				if ($card.hasClass("card-flipped")) {
+					$card.removeClass("card-flipped");
+				} else {
+					$card.addClass("card-flipped");	
+				}
+			}
 		}, calcDelay());
 	}
 
@@ -187,8 +165,10 @@ let g_ui = (function() {
 		}, calcDelay());
 	}
 
-	function animationCompleted() {
-		m_animations -= 1;
+	function animationCompleted(noDelay) {
+		if(!noDelay) {
+			m_animations -= 1;	
+		}
 		if(m_animations === 0){
 			let temp = m_onCompleteCommands.slice();
 			m_onCompleteCommands = [];
