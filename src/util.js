@@ -34,4 +34,5 @@ let g_util = (function() {
 			elem.msRequestFullscreen();
 		}
 	}
+
 })();

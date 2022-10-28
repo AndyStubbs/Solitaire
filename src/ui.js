@@ -35,8 +35,8 @@ let g_ui = (function() {
 		m_animations += 1;
 	}
 
-	function onComplete(cmd) {
-		m_onCompleteCommands.push(cmd);
+	function onComplete( cmd ) {
+		m_onCompleteCommands.push( cmd );
 	}
 
 	function setupDeckClick($src, $dest, onEmptyCmd) {

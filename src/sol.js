@@ -15,7 +15,8 @@ let g_sol = ( function () {
 	function start() {
 		m_isRunning = true;
 		g_uiDrag.setupDragCards(
-			".stack .card-flipped, #main-pile .card-flipped:nth-last-child(1)",
+			".normal-stack .card-flipped, #main-pile .card-flipped:nth-last-child(1)" +
+				", .stack .card-flipped:nth-last-child(1)",
 			"stack",
 			m_speedPerPixel,
 			canPlaceCard,
@@ -35,6 +36,10 @@ let g_sol = ( function () {
 			}, m_slowSpeed );
 		} );
 		$( "#table" ).on( "click", ".stack", stackClicked );
+		$( document.body ).on( "dblclick",
+			".normal-stack .card-flipped:nth-last-child(1), #main-pile .card-flipped:nth-last-child(1)",
+			cardDoubleClick
+		);
 		$( window ).on( "resize", onWindowResize );
 	}
 	/*
@@ -53,6 +58,24 @@ let g_sol = ( function () {
 		if ( $card.length > 0 && $card.hasClass( "card" ) && !$card.hasClass( "card-flipped" ) ) {
 			g_ui.flipCard( $stack );
 		}
+	}
+
+	function cardDoubleClick() {
+		var $card, $stacks, i, $stack;
+
+		$card = $( this );
+		$stacks = $( ".suit-stack" );
+		for( i = 0; i < $stacks.length; i++ ) {
+			$stack = $( $stacks.get( i ) );
+			if( canPlaceCard( $stack, $card ) ) {
+				g_ui.dealCard( $card.parent(), $stack );
+				g_ui.onComplete( function () {
+					checkSize();
+				} );
+				break;
+			}
+		}
+		g_uiDrag.resetDrag();
 	}
 
 	function onWindowResize() {

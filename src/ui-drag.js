@@ -16,7 +16,8 @@ let g_uiDrag = (function() {
 
 	return {
 		"setupDragCards": setupDragCards,
-		"updateSpeed": updateSpeed
+		"updateSpeed": updateSpeed,
+		"resetDrag": resetDrag
 	};
 
 	function setupDragCards( cardSelector, stackClass, speedPerPixel, canPlaceCardCmd, onCardPlacedCmd ) {
@@ -35,6 +36,12 @@ let g_uiDrag = (function() {
 
 	function updateSpeed( speedPerPixel ) {
 		m_speedPerPixel = speedPerPixel;
+	}
+
+	function resetDrag() {
+		m_$dragged = null;
+		m_startDrag = false;
+		m_canStartDrag = true;
 	}
 
 	/*
