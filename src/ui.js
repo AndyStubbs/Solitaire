@@ -16,10 +16,10 @@ let g_ui = (function() {
 		"setSpeed": setSpeed
 	};
 
-	function createDeck(deck, $dest) {
-		for (let i = 0; i < deck.length; i++) {
-			let $card = createCard(deck[i].id);
-			$dest.append($card);
+	function createDeck( deck, $dest ) {
+		for( let i = 0; i < deck.length; i++ ) {
+			let $card = createCard( deck[ i ]);
+			$dest.append( $card );
 		}
 	}
 
@@ -30,8 +30,8 @@ let g_ui = (function() {
 		}
 	}
 
-	function flipCard($src) {
-		runFlipCardAnimation($src);
+	function flipCard( $src ) {
+		runFlipCardAnimation( $src );
 		m_animations += 1;
 	}
 
@@ -49,25 +49,29 @@ let g_ui = (function() {
 		$( ".card-part" ).css( "transition-duration", ( m_speed / 1000 ) + "s" );
 	}
 
+	/*
+ 		Internal Functions
+ 	*/
+
 	function deckClicked() {
 		let $src, $dest, onEmptyCmd;
 		$src = m_deckClickedParams[ 0 ];
 		$dest = m_deckClickedParams[ 1 ];
 		onEmptyCmd = m_deckClickedParams[ 2 ];
 		
-		if ($src.children().length === 0) {
+		if ( $src.children().length === 0 ) {
 			onEmptyCmd();
 			return;
 		}
 
-		dealCard($src, $dest, true);
+		dealCard( $src, $dest, true );
 	}
 
-	function createCard(value) {
+	function createCard( value )  {
 		var $card, cardValue, cardSuit;
 
-		cardSuit = getSuit(value);
-		cardValue = getCardValue(value);
+		cardSuit = g_cards.getSuit( value );
+		cardValue = g_cards.getValueClass( value );
 		$card = $(
 			"<div class='card' data-card='" + value + "'>" +
 			"<div class='card-part card-back'></div>" +
@@ -82,30 +86,6 @@ let g_ui = (function() {
 
 	function calcDelay() {
 		return m_animations * m_delay;
-	}
-
-	function getSuit(card) {
-		var suits = ["card-hearts", "card-clubs", "card-diamonds", "card-spades"];
-		return suits[Math.floor(card / 13)];
-	}
-
-	function getCardNumber(value) {
-		return (value % 13) + 1;
-	}
-
-	function getCardValue(card) {
-		var value = getCardNumber(card);
-		if (value === 1) {
-			return "card-a";
-		} else if (value === 11) {
-			return "card-j";
-		} else if (value === 12) {
-			return "card-q";
-		} else if (value === 13) {
-			return "card-k";
-		}
-
-		return "card-" + value;
 	}
 
 	function runDealCardAnimation($src, $dest, isFlip, noDelay) {
@@ -153,27 +133,26 @@ let g_ui = (function() {
 		}, calcDelay());
 	}
 
-	function runFlipCardAnimation($src) {
+	function runFlipCardAnimation( $src ) {
 		setTimeout( function () {
-			//$card.find( ".card-part" ).css( "transition-duration", ( m_speed / 1000 ) + "s" );
 			// Make sure there is at least one card in the deck
-			if ($src.children().length === 0) {
+			if( $src.children().length === 0 ) {
 				return;
 			}		
-			$src.children().last().addClass("card-flipped");
-			setTimeout(animationCompleted, m_speed);
-		}, calcDelay());
+			$src.children().last().addClass( "card-flipped" );
+			setTimeout( animationCompleted, m_speed );
+		}, calcDelay() );
 	}
 
-	function animationCompleted(noDelay) {
-		if(!noDelay) {
+	function animationCompleted( noDelay ) {
+		if( !noDelay ) {
 			m_animations -= 1;	
 		}
-		if(m_animations === 0){
+		if( m_animations === 0 ){
 			let temp = m_onCompleteCommands.slice();
 			m_onCompleteCommands = [];
-			for(let i = 0; i < temp.length; i++) {
-				temp[i]();
+			for( let i = 0; i < temp.length; i++ ) {
+				temp[ i ]();
 			}
 		}
 	}

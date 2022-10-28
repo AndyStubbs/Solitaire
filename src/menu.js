@@ -96,6 +96,7 @@ let g_menu = ( function() {
 
 })();
 
-$(document).ready(function() {
+$( window ).on( "load", function() {
+	// TODO: Add loading screen and hide it here
 	g_menu.init();
-});
+} );
