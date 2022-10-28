@@ -26,15 +26,7 @@ let g_sol = ( function () {
 		g_ui.setSpeed( m_baseSpeed );
 		dealDeck();
 		resize();
-		g_ui.setupDeckClick( $( "#main-deck" ), $( "#main-pile" ), function () {
-			g_ui.setSpeed( m_slowSpeed );
-			$( "#main-pile .card" ).each(function () {
-				g_ui.dealCard( $( "#main-pile" ), $( "#main-deck" ), true, true );
-			} );
-			setTimeout( function () {
-				g_ui.setSpeed( m_baseSpeed );
-			}, m_slowSpeed );
-		} );
+		g_ui.setupDeckClick( $( "#main-deck" ), $( "#main-pile" ), mainDeckClicked );
 		$( "#table" ).on( "click", ".stack", stackClicked );
 		$( document.body ).on( "dblclick",
 			".normal-stack .card-flipped:nth-last-child(1), #main-pile .card-flipped:nth-last-child(1)",
@@ -46,6 +38,16 @@ let g_sol = ( function () {
 	/*
  		Event Functions
  	*/
+
+	function mainDeckClicked() {
+		g_ui.setSpeed( m_slowSpeed );
+		$( "#main-pile .card" ).each(function () {
+			g_ui.dealCard( $( "#main-pile" ), $( "#main-deck" ), true, true );
+		} );
+		setTimeout( function () {
+			g_ui.setSpeed( m_baseSpeed );
+		}, m_slowSpeed );
+	}
 
 	function stackClicked() {
 		var $card, $stack;
