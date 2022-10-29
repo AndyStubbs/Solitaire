@@ -9,6 +9,7 @@ let g_ui = (function() {
 
 	return {
 		"createDeck": createDeck,
+		"createCard": createCard,
 		"dealCard": dealCard,
 		"flipCard": flipCard,
 		"onComplete": onComplete,
@@ -21,6 +22,23 @@ let g_ui = (function() {
 			let $card = createCard( deck[ i ]);
 			$dest.append( $card );
 		}
+	}
+
+	function createCard( value )  {
+		var $card, cardValue, cardSuit;
+
+		cardSuit = g_cards.getSuit( value );
+		cardValue = g_cards.getValueClass( value );
+		$card = $(
+			"<div class='card' data-card='" + value + "'>" +
+			"<div class='card-part card-back'></div>" +
+			"<div class='card-part card-front " + cardSuit + " " + cardValue + "'></div>" +
+			"</div>"
+		);
+
+		$card.find( ".card-part" ).css( "transition-duration", ( m_speed / 1000 ) + "s" );
+		
+		return $card;
 	}
 
 	function dealCard($src, $dest, isFlip, noDelay) {
@@ -39,9 +57,9 @@ let g_ui = (function() {
 		m_onCompleteCommands.push( cmd );
 	}
 
-	function setupDeckClick($src, $dest, onEmptyCmd) {
-		m_deckClickedParams = [ $src, $dest, onEmptyCmd ];
-		$src.on("click", deckClicked);
+	function setupDeckClick( $src, $dest, onCardDealt, onEmptyCmd ) {
+		m_deckClickedParams = [ $src, $dest, onCardDealt, onEmptyCmd ];
+		$src.on( "click", deckClicked );
 	}
 
 	function setSpeed(speed) {
@@ -54,10 +72,11 @@ let g_ui = (function() {
  	*/
 
 	function deckClicked() {
-		let $src, $dest, onEmptyCmd;
+		let $src, $dest, onCardDealt, onEmptyCmd;
 		$src = m_deckClickedParams[ 0 ];
 		$dest = m_deckClickedParams[ 1 ];
-		onEmptyCmd = m_deckClickedParams[ 2 ];
+		onCardDealt = m_deckClickedParams[ 2 ];
+		onEmptyCmd = m_deckClickedParams[ 3 ];
 		
 		if ( $src.children().length === 0 ) {
 			onEmptyCmd();
@@ -65,23 +84,7 @@ let g_ui = (function() {
 		}
 
 		dealCard( $src, $dest, true );
-	}
-
-	function createCard( value )  {
-		var $card, cardValue, cardSuit;
-
-		cardSuit = g_cards.getSuit( value );
-		cardValue = g_cards.getValueClass( value );
-		$card = $(
-			"<div class='card' data-card='" + value + "'>" +
-			"<div class='card-part card-back'></div>" +
-			"<div class='card-part card-front " + cardSuit + " " + cardValue + "'></div>" +
-			"</div>"
-		);
-
-		$card.find( ".card-part" ).css( "transition-duration", ( m_speed / 1000 ) + "s" );
-		
-		return $card;
+		onComplete( onCardDealt );
 	}
 
 	function calcDelay() {

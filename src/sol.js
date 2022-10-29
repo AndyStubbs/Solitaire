@@ -7,6 +7,8 @@ let g_sol = ( function () {
 	let m_isShrunk = false;
 	let m_resizeTimeout = null;
 	let m_isRunning = false;
+	let m_undoStack = [];
+	let m_undoPointer = 0;
 
 	return {
 		"start": start
@@ -20,32 +22,45 @@ let g_sol = ( function () {
 			"stack",
 			m_speedPerPixel,
 			canPlaceCard,
-			checkSize
+			cardMoved
 		);
 		g_ui.createDeck( g_cards.createDeck( true ), $( "#main-deck" ) );
 		g_ui.setSpeed( m_baseSpeed );
 		dealDeck();
 		resize();
-		g_ui.setupDeckClick( $( "#main-deck" ), $( "#main-pile" ), mainDeckClicked );
+		g_ui.setupDeckClick(
+			$( "#main-deck" ),
+			$( "#main-pile" ),
+			mainDeckCardDealt,
+			mainDeckResetClicked
+		);
 		$( "#table" ).on( "click", ".stack", stackClicked );
 		$( document.body ).on( "dblclick",
 			".normal-stack .card-flipped:nth-last-child(1), #main-pile .card-flipped:nth-last-child(1)",
 			cardDoubleClick
 		);
 		$( window ).on( "resize", onWindowResize );
+		$( window ).on( "keypress", onKeypress );
 	}
 
 	/*
  		Event Functions
  	*/
 
-	function mainDeckClicked() {
+	function mainDeckCardDealt() {
+		saveState();
+	}
+
+	function mainDeckResetClicked() {
 		g_ui.setSpeed( m_slowSpeed );
 		$( "#main-pile .card" ).each(function () {
 			g_ui.dealCard( $( "#main-pile" ), $( "#main-deck" ), true, true );
 		} );
 		setTimeout( function () {
 			g_ui.setSpeed( m_baseSpeed );
+			setTimeout( function () {
+				saveState();
+			}, 50 );
 		}, m_slowSpeed );
 	}
 
@@ -60,6 +75,9 @@ let g_sol = ( function () {
 		$card = $stack.children().last();
 		if ( $card.length > 0 && $card.hasClass( "card" ) && !$card.hasClass( "card-flipped" ) ) {
 			g_ui.flipCard( $stack );
+			g_ui.onComplete( function () {
+				saveState();
+			} );
 		}
 	}
 
@@ -74,6 +92,7 @@ let g_sol = ( function () {
 				g_ui.dealCard( $card.parent(), $stack );
 				g_ui.onComplete( function () {
 					checkSize();
+					saveState();
 				} );
 				break;
 			}
@@ -81,10 +100,29 @@ let g_sol = ( function () {
 		g_uiDrag.resetDrag();
 	}
 
+	function cardMoved() {
+		checkSize();
+		saveState();
+	}
+	
 	function onWindowResize() {
 		// TODO: Add a loading screen when resizing cards
 		clearTimeout( m_resizeTimeout );
 		m_resizeTimeout = setTimeout( resize, 100 );
+	}
+
+	function onKeypress( e ) {
+		if( e.key.toLowerCase() === "z" && e.ctrlKey ) {
+			if( m_undoPointer >= m_undoStack.length || m_undoPointer < 0 ) {
+				return;
+			}
+			restoreState( m_undoStack[ m_undoPointer ] );
+			m_undoPointer -= 1;
+			for( let i = m_undoPointer + 1; i < m_undoStack.length; i++ ) {
+				m_undoStack.pop();
+			}
+			updateUndoStack();
+		}
 	}
 
 	/*
@@ -200,11 +238,14 @@ let g_sol = ( function () {
 				g_ui.dealCard( $( "#main-deck" ), $( "#stack-" + ( col + 1 ) ) );
 			}
 		}
-		g_ui.onComplete(function () {
+		g_ui.onComplete( function () {
 			for( let i = 1; i < 8; i++ ) {
 				g_ui.flipCard( $( "#stack-" + i ) );
 			}
-		});
+			g_ui.onComplete( function () {
+				saveState();
+			} );
+		} );
 	}
 
 	function canPlaceCard( $stack, $card ) {
@@ -240,6 +281,81 @@ let g_sol = ( function () {
 			return true;
 		}
 		return false;
+	}
+
+	function saveState() {
+		let cards = [];
+		$( ".card:not(#card-placeholder)" ).each( function () {
+			if( !this.dataset.card ) {
+				return;
+			}
+			let $card = $( this );
+			cards.push( {
+				"value": parseInt( this.dataset.card ),
+				"flip": $card.hasClass( "card-flipped" ),
+				"parentId": $card.parent().get( 0 ).id
+			} );
+		} );
+
+		// Make sure the undo stack is not the same as new stack
+		if( m_undoStack.length === 0 || !compareStacks( cards, m_undoStack[ m_undoStack.length - 1 ] ) ) {
+			console.log( "Saving State" );
+			m_undoStack.push( cards );
+			m_undoPointer = m_undoStack.length - 2;
+			updateUndoStack();
+		}
+	}
+
+	function compareStacks( stack1, stack2 ) {
+		for( let i = 0; i < stack1.length; i++ ) {
+			if(
+				!stack2[ i ] ||
+				stack1[ i ].value !== stack2[ i ].value ||
+				stack1[ i ].flip !== stack2[ i ].flip ||
+				stack1[ i ].parentId !== stack2[ i ].parentId
+			) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	function restoreState( cards ) {
+		g_uiDrag.resetDrag();
+
+		$( ".card:not(#card-placeholder)" ).remove();
+		for( let i = 0; i < cards.length; i++ ) {
+			let data = cards[ i ];
+			let $card = $( g_ui.createCard( data.value ) );
+			if( data.flip ) {
+				$card.addClass( "card-flipped" );
+			}
+			$( "#" + data.parentId ).append( $card );
+		}
+		resize();
+		checkSize();
+	}
+
+	function updateUndoStack() {
+
+		// Clear the undo stack
+		$( "#undo-data" ).html( "" );
+		for( let i = 0; i < m_undoStack.length; i++ ) {
+			let $div = $( "<div>" );
+			if( i === m_undoPointer ) {
+				$div.html( "* Undo " + i );	
+			} else {
+				$div.html( "Undo " + i );
+			}
+			
+			$div.data( "index", i )
+			$div.on( "click", function () {
+				let index = $( this ).data( "index" );
+				restoreState( m_undoStack[ index ] );
+			} );
+			$( "#undo-data" ).append( $div );
+		}
+
 	}
 
 } )();
