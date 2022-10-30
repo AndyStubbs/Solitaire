@@ -14,6 +14,7 @@ let g_ui = (function() {
 		"flipCard": flipCard,
 		"onComplete": onComplete,
 		"setupDeckClick": setupDeckClick,
+		"disableDeckClick": disableDeckClick,
 		"setSpeed": setSpeed
 	};
 
@@ -62,9 +63,13 @@ let g_ui = (function() {
 		$src.on( "click", deckClicked );
 	}
 
+	function disableDeckClick( $src ) {
+		$src.off( "click", deckClicked );
+	}
+
 	function setSpeed(speed) {
 		m_speed = speed;
-		m_delay = m_speed;
+		m_delay = m_speed / 2;
 		$( ".card-part" ).css( "transition-duration", ( m_speed / 1000 ) + "s" );
 	}
 
@@ -80,7 +85,7 @@ let g_ui = (function() {
 		onCardDealt = m_deckClickedParams[ 3 ];
 		onEmptyCmd = m_deckClickedParams[ 4 ];
 		
-		if ( $src.children().length === 0 ) {
+		if ( $src.find( ".card" ).length === 0 ) {
 			onEmptyCmd();
 			return;
 		}

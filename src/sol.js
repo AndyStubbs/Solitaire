@@ -66,14 +66,33 @@ let g_sol = ( function () {
  		Event Functions
  	*/
 
-	function mainDeckCardDealt() {
+	function mainDeckCardDealt() {	
+		if( m_scoreMode === "Vegas" ) {
+			if( $( "#main-deck .card" ).length === 0 ) {
+				let $mainDeck = $( "#main-deck" );
+				if( m_drawMode === "One" || m_deckCount === 2 ) {
+					g_ui.disableDeckClick( $mainDeck );
+					$mainDeck.css( "cursor", "default" );
+					$mainDeck.append( "<span style='color: red;'>X</span>" );
+				} else {
+					$mainDeck.append( "<span style='color: green;'>" + ( m_deckCount + 1 ) + "</span>" );
+				}
+			}
+		} else {
+			if( $( "#main-deck .card" ).length === 0 ) {
+				let $mainDeck = $( "#main-deck" );				
+				$mainDeck.append( "<span style='color: green;'>" + ( m_deckCount + 1 ) + "</span>" );
+			}
+		}
 		saveState();
 	}
 
 	function mainDeckResetClicked() {
+		let $mainDeck = $( "#main-deck" );
+		$mainDeck.html( "" );
 		g_ui.setSpeed( m_slowSpeed * m_speedFactor );
 		$( "#main-pile .card" ).each(function () {
-			g_ui.dealCard( $( "#main-pile" ), $( "#main-deck" ), true, true );
+			g_ui.dealCard( $( "#main-pile" ), $mainDeck, true, true );
 		} );
 		setTimeout( function () {
 			g_ui.setSpeed( m_baseSpeed * m_speedFactor );

@@ -38,6 +38,19 @@ html, body {
 #main-deck {
 	display: inline-block;
 	background-color: rgba( 240, 128, 128, 0.1 );
+	vertical-align: top;
+	cursor: pointer;
+}
+
+#main-deck span {
+	display: block;
+    text-align: center;
+    font-size: 48px;
+    margin-top: 50%;
+    font-weight: bold;
+    -webkit-text-stroke: 1px black;
+    text-stroke: 1px black;
+	opacity: 0.8;
 }
 
 #main-pile {
@@ -113,8 +126,6 @@ html, body {
 .card-flipped .card-front {
 	transform: rotateY(0deg);
 }
-
-
 
 /*
 #score-bar {
