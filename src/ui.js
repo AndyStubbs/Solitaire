@@ -64,6 +64,7 @@ let g_ui = (function() {
 
 	function setSpeed(speed) {
 		m_speed = speed;
+		m_delay = m_speed;
 		$( ".card-part" ).css( "transition-duration", ( m_speed / 1000 ) + "s" );
 	}
 

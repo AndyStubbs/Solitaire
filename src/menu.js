@@ -8,7 +8,8 @@ let g_menu = ( function() {
 
 	let m_settings = {
 		"draw": "One",
-		"scoring": "Standard"
+		"scoring": "Standard",
+		"speed": "Normal"
 	};
 
 	return {
@@ -19,7 +20,7 @@ let g_menu = ( function() {
 	function init() {
 		$( "#menu" ).show();
 		$( "#btn-start" ).on( "click", function() {
-			$( "#menu" ).hide();
+			$( "#menu" ).slideToggle();
 			g_sol.start( m_settings );
 			if( g_util.isMobile() ) {
 				g_util.openFullscreen( document.body );
@@ -29,21 +30,25 @@ let g_menu = ( function() {
 			}
 		} );
 		$( "#btn-settings" ).on( "click", function () {
-			$( "#menu-main" ).hide();
-			$( "#menu-settings" ).show();
+			$( "#menu-main" ).fadeTo( 300, 0 );
+			$( "#menu-settings" ).slideToggle();
 			$( "#select-draw" ).val( m_settings.draw );
 			$( "#select-scoring" ).val( m_settings.scoring );
+			$( "#select-speed" ).val( m_settings.speed );
 		} );
 		$( "#btn-ok" ).on( "click", function () {
 			m_settings.draw = $( "#select-draw" ).val();
 			m_settings.scoring = $( "#select-scoring" ).val();
-			$( "#menu-main" ).show();
-			$( "#menu-settings" ).hide();
+			m_settings.speed = $( "#select-speed" ).val();
+			$( "#menu-main" ).fadeTo( 500, 1 );
+			$( "#menu-settings" ).slideToggle();
 		} );
 		$( "#btn-cancel" ).on( "click", function () {
-			$( "#menu-main" ).show();
-			$( "#menu-settings" ).hide();
+			$( "#menu-main" ).fadeTo( 500, 1 );
+			$( "#menu-settings" ).slideToggle();
 		} );
+		$( "#score-bar" ).on( "click", scoreBarClicked );
+		$( document.body ).on( "mousedown", ":not(#score-bar)", scoreBarToggleOff );
 	}
 
 	function resize( height ) {

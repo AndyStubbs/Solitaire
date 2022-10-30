@@ -50,6 +50,21 @@
 
 #menu-settings {
 	display: none;
+	background-color: rgba( 255, 255, 255, 0.25 );
+	border-top: 2px solid rgba( 255, 255, 255, 0.75 );
+	border-bottom: 2px solid rgba( 255, 255, 255, 0.75 );
+}
+
+#menu-settings label {
+	display: inline-block;
+	width: 140px;
+	text-align: left;
+	font-size: large;
+}
+
+#menu-settings select {
+	width: 150px;
+	padding: 5px;
 }
 
 #undo-data {
@@ -60,9 +75,6 @@
 	background-color: rgba( 255, 255, 255, 0.25 );
 	border: 2px solid rgba( 255, 255, 255, 0.5 );
 	padding: 15px;
-}
-
-#undo-data {
 	display: none;
 	text-decoration: underline;
 	cursor: pointer;

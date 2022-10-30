@@ -2,9 +2,11 @@ let g_sol = ( function () {
 	"use strict";
 
 	const DRAW_COUNT = { "One": 1, "Three": 3 };
+	const SPEED_FACTORS = { "Slow": 2, "Normal": 1, "Fast": 0.5 };
 	let m_baseSpeed = 150;
 	let m_slowSpeed = 500;
 	let m_speedPerPixel = 0.5;
+	let m_speedFactor = 1;
 	let m_isShrunk = false;
 	let m_resizeTimeout = null;
 	let m_isRunning = false;
@@ -24,6 +26,7 @@ let g_sol = ( function () {
 	function start( settings ) {
 		m_drawMode = settings.draw;
 		m_scoreMode = settings.scoring;
+		m_speedFactor = SPEED_FACTORS[ settings.speed ];
 		if( m_scoreMode === "Standard" ) {
 			m_score = 0;
 		} else {
@@ -35,12 +38,12 @@ let g_sol = ( function () {
 			".normal-stack .card-flipped, #main-pile .card-flipped:nth-last-child(1)" +
 				", .stack .card-flipped:nth-last-child(1)",
 			"stack",
-			m_speedPerPixel,
+			m_speedPerPixel * m_speedFactor,
 			canPlaceCard,
 			cardMoved
 		);
 		g_ui.createDeck( g_cards.createDeck( true ), $( "#main-deck" ) );
-		g_ui.setSpeed( m_baseSpeed );
+		g_ui.setSpeed( m_baseSpeed * m_speedFactor );
 		dealDeck();
 		resize();
 		g_ui.setupDeckClick(
@@ -68,16 +71,16 @@ let g_sol = ( function () {
 	}
 
 	function mainDeckResetClicked() {
-		g_ui.setSpeed( m_slowSpeed );
+		g_ui.setSpeed( m_slowSpeed * m_speedFactor );
 		$( "#main-pile .card" ).each(function () {
 			g_ui.dealCard( $( "#main-pile" ), $( "#main-deck" ), true, true );
 		} );
 		setTimeout( function () {
-			g_ui.setSpeed( m_baseSpeed );
+			g_ui.setSpeed( m_baseSpeed * m_speedFactor );
 			setTimeout( function () {
 				saveState();
 			}, 50 );
-		}, m_slowSpeed );
+		}, m_slowSpeed * m_speedFactor );
 		m_deckCount += 1;
 		if( m_scoreMode === "Standard" ) {
 			if( m_drawMode === "One" ) {
