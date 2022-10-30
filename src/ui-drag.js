@@ -13,25 +13,28 @@ let g_uiDrag = (function() {
 	let m_speedPerPixel = 0.5;
 	let m_isAnimating = false;
 	let m_onCardPlacedCmd = null;
+	let m_cardSelector = null;
 
 	return {
 		"setupDragCards": setupDragCards,
 		"updateSpeed": updateSpeed,
-		"resetDrag": resetDrag
+		"resetDrag": resetDrag,
+		"reset": reset
 	};
 
 	function setupDragCards( cardSelector, stackClass, speedPerPixel, canPlaceCardCmd, onCardPlacedCmd ) {
-		$( document.body ).on( "mousedown", cardSelector, startDrag );
-		$( document.body ).on( "touchstart", cardSelector, touchStart );
+		m_cardSelector = cardSelector;
+		m_stackClass = stackClass;
+		m_speedPerPixel = speedPerPixel;
+		m_canPlaceCardCmd = canPlaceCardCmd;
+		m_onCardPlacedCmd = onCardPlacedCmd;
+		$( document.body ).on( "mousedown", m_cardSelector, startDrag );
+		$( document.body ).on( "touchstart", m_cardSelector, touchStart );
 		$( document.body ).on( "mousemove", dragMove );
 		$( document.body ).on( "touchmove", touchMove );
 		$( document.body ).on( "mouseup", stopDrag );
 		$( document.body ).on( "touchend", touchEnd );
 		$( window ).on( "blur", stopDrag );
-		m_stackClass = stackClass;
-		m_speedPerPixel = speedPerPixel;
-		m_canPlaceCardCmd = canPlaceCardCmd;
-		m_onCardPlacedCmd = onCardPlacedCmd;
 	}
 
 	function updateSpeed( speedPerPixel ) {
@@ -52,6 +55,16 @@ let g_uiDrag = (function() {
 		m_canStartDrag = true;
 	}
 
+	function reset() {
+		$( document.body ).off( "mousedown", m_cardSelector, startDrag );
+		$( document.body ).off( "touchstart", m_cardSelector, touchStart );
+		$( document.body ).off( "mousemove", dragMove );
+		$( document.body ).off( "touchmove", touchMove );
+		$( document.body ).off( "mouseup", stopDrag );
+		$( document.body ).off( "touchend", touchEnd );
+		$( window ).off( "blur", stopDrag );
+		resetDrag();
+	}
 	/*
  		Event Functions
  	*/

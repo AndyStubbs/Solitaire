@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-US">
 
 <head>
 	<meta charset="utf-8">
@@ -16,10 +16,17 @@
 	</script>
 </head>
 <body>
+	<div id="loading-overlay">
+		<div>
+			<h1>Solitaire</h1>
+			Loading <span>.</span> <span>.</span> <span>.</span>
+		</div>
+	</div>
 	<div id="menu">
 		<div id="menu-main">
 			<h1>Solitaire</h1>
-			<input id="btn-start" type="button" value="Start Game" class="button" />
+			<input id="btn-start" type="button" value="New Game" class="button" />
+			<input id="btn-continue" type="button" value="Continue" class="button" />
 			<input id="btn-settings" type="button" value="Settings" class="button" />
 		</div>
 		<div id="menu-settings">
@@ -78,15 +85,13 @@
 	</div>
 	<div id="score-bar">
 		<div class="score-row">
-			<input type="button" value="Menu" class="button" />
+			<input id="btn-menu" type="button" value="Menu" class="button" />
 			<span id="score">Score: 0</span>
 			<span id="timer">Time: 0</span>
 		</div>
 		<div id="score-toggle">&#9661;</div>
 	</div>
-	<div id="undo-data">
-		
-	</div>
+	<div id="undo-data"></div>
 	<script src="src/util.js"></script>
 	<script src="src/cards.js"></script>
 	<script src="src/ui.js"></script>

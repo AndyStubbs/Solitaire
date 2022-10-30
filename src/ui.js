@@ -6,6 +6,7 @@ let g_ui = (function() {
 	let m_delay = 75;
 	let m_onCompleteCommands = [];
 	let m_deckClickedParams;
+	let m_timeouts = [];
 
 	return {
 		"createDeck": createDeck,
@@ -15,7 +16,8 @@ let g_ui = (function() {
 		"onComplete": onComplete,
 		"setupDeckClick": setupDeckClick,
 		"disableDeckClick": disableDeckClick,
-		"setSpeed": setSpeed
+		"setSpeed": setSpeed,
+		"reset": reset
 	};
 
 	function createDeck( deck, $dest ) {
@@ -42,9 +44,9 @@ let g_ui = (function() {
 		return $card;
 	}
 
-	function dealCard($src, $dest, isFlip, noDelay) {
-		runDealCardAnimation($src, $dest, isFlip, noDelay);
-		if(!noDelay) {
+	function dealCard( $src, $dest, isFlip, noDelay ) {
+		runDealCardAnimation( $src, $dest, isFlip, noDelay );
+		if( !noDelay ) {
 			m_animations += 1;	
 		}
 	}
@@ -67,10 +69,19 @@ let g_ui = (function() {
 		$src.off( "click", deckClicked );
 	}
 
-	function setSpeed(speed) {
+	function setSpeed( speed ) {
 		m_speed = speed;
 		m_delay = m_speed / 2;
 		$( ".card-part" ).css( "transition-duration", ( m_speed / 1000 ) + "s" );
+	}
+
+	function reset( $src ) {
+		m_onCompleteCommands = [];
+		m_animations = 0;
+		$src.off( "click", deckClicked );
+		m_timeouts.forEach( function ( timeout ) {
+			clearTimeout( timeout );
+		} );
 	}
 
 	/*
@@ -100,12 +111,12 @@ let g_ui = (function() {
 		return m_animations * m_delay;
 	}
 
-	function runDealCardAnimation($src, $dest, isFlip, noDelay) {
-		setTimeout(function() {
+	function runDealCardAnimation( $src, $dest, isFlip, noDelay ) {
+		let timeout = setTimeout( function() {
 			var $card, sourceOffset, destOffset;
 
 			// Make sure there is at least one card in the deck
-			if ($src.children().length === 0) {
+			if( $src.children().length === 0 ) {
 				return;
 			}
 
@@ -114,46 +125,52 @@ let g_ui = (function() {
 			sourceOffset = $card.offset();
 
 			// Move the card in the DOM
-			$dest.append($card);
+			$dest.append( $card );
 			destOffset = $card.offset();
 
-			//$card.find( ".card-part" ).css( "transition-duration", ( m_speed / 1000 ) + "s" );
-
 			$card
-				.css("position", "relative")
-				.css("left", (sourceOffset.left - destOffset.left) + "px")
-				.css("top", (sourceOffset.top - destOffset.top) + "px");
+				.css( "position", "relative" )
+				.css( "left", ( sourceOffset.left - destOffset.left ) + "px" )
+				.css("top", ( sourceOffset.top - destOffset.top ) + "px");
 
-			$card.animate({
+			$card.animate( {
 				"left": 0,
 				"top": 0
 			}, m_speed, function() {
-				$card
-					.css("position", "")
-					.css("left", "")
-					.css("top", "");
-				animationCompleted(noDelay);
-			});
+				// Check if card has been removed from the DOM
+				if( document.contains( $card.get( 0 ) ) ) {
+					$card
+						.css( "position", "" )
+						.css( "left", "" )
+						.css( "top", "" );
+					animationCompleted( noDelay );
+				}
+			} );
 
-			if (isFlip) {
-				if ($card.hasClass("card-flipped")) {
-					$card.removeClass("card-flipped");
+			if( isFlip ) {
+				if( $card.hasClass("card-flipped") ) {
+					$card.removeClass( "card-flipped" );
 				} else {
-					$card.addClass("card-flipped");	
+					$card.addClass( "card-flipped" );	
 				}
 			}
-		}, calcDelay());
+		}, calcDelay() );
+
+		m_timeouts.push( timeout );
 	}
 
 	function runFlipCardAnimation( $src ) {
-		setTimeout( function () {
+		let timeout = setTimeout( function () {
 			// Make sure there is at least one card in the deck
 			if( $src.children().length === 0 ) {
 				return;
 			}		
 			$src.children().last().addClass( "card-flipped" );
-			setTimeout( animationCompleted, m_speed );
+			let timeout = setTimeout( animationCompleted, m_speed );
+			m_timeouts.push( timeout );
 		}, calcDelay() );
+
+		m_timeouts.push( timeout );
 	}
 
 	function animationCompleted( noDelay ) {
@@ -167,5 +184,6 @@ let g_ui = (function() {
 				temp[ i ]();
 			}
 		}
+		console.log( m_animations );
 	}
 })();

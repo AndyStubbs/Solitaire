@@ -6,6 +6,7 @@ html, body {
 	text-align: center;
 	background-color: rgb(39, 27, 16);
 	background-image: url("../img/table.jpg");
+	-webkit-user-select: none;
 	user-select: none;
 }
 

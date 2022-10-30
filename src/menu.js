@@ -18,16 +18,28 @@ let g_menu = ( function() {
 	};
 
 	function init() {
+		$( "#loading-overlay" ).fadeOut();
+		g_sol.init();
+		if( !g_sol.isGameInProgress() ) {
+			$( "#btn-continue" ).hide();
+		}
 		$( "#menu" ).show();
+		$( "#btn-menu" ).on( "click", function () {
+			g_sol.pause();
+			$( "#menu" ).slideToggle();
+			if( g_sol.isGameInProgress() ) {
+				$( "#btn-continue" ).show();
+			}
+		} );
 		$( "#btn-start" ).on( "click", function() {
 			$( "#menu" ).slideToggle();
 			g_sol.start( m_settings );
-			if( g_util.isMobile() ) {
-				g_util.openFullscreen( document.body );
-				if ( "orientation" in screen ) {
-					screen.orientation.lock( "landscape-primary" );
-				}
-			}
+			activateGameScreen();
+		} );
+		$( "#btn-continue" ).on( "click", function () {
+			$( "#menu" ).slideToggle();
+			g_sol.continueGame( m_settings );
+			activateGameScreen();
 		} );
 		$( "#btn-settings" ).on( "click", function () {
 			$( "#menu-main" ).fadeTo( 300, 0 );
@@ -70,6 +82,15 @@ let g_menu = ( function() {
 		}
 	}
 
+	function activateGameScreen() {
+		if( g_util.isMobile() ) {
+			g_util.openFullscreen( document.body );
+			if ( "orientation" in screen ) {
+				screen.orientation.lock( "landscape-primary" );
+			}
+		}
+	}
+
 	function scoreBarClicked() {
 		if (m_menu.status === "toggle" && m_menu.state === "hidden") {
 			m_menu.state = "animating";
@@ -83,7 +104,6 @@ let g_menu = ( function() {
 	}
 
 	function scoreBarToggleOff() {
-		console.log("Body Mousedown");
 		if ($(this).closest("#score-bar").length > 0) {
 			return;
 		}

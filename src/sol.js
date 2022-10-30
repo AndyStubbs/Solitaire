@@ -18,21 +18,35 @@ let g_sol = ( function () {
 	let m_drawMode = "One";
 	let m_scoreMode = "Standard";
 	let m_deckCount = 0;
+	let m_timeInterval = null;
+	let m_timeouts = [];
 
 	return {
-		"start": start
+		"init": init,
+		"start": start,
+		"continueGame": continueGame,
+		"pause": pause,
+		"isGameInProgress": isGameInProgress
 	};
-	
-	function start( settings ) {
-		m_drawMode = settings.draw;
-		m_scoreMode = settings.scoring;
-		m_speedFactor = SPEED_FACTORS[ settings.speed ];
-		if( m_scoreMode === "Standard" ) {
-			m_score = 0;
-		} else {
-			m_score = -52;
+
+	function init() {
+		let gameData = JSON.parse( localStorage.getItem( "gameData" ) );
+		if( gameData !== null ) {
+			m_drawMode = gameData.drawMode;
+			m_scoreMode = gameData.scoreMode;
+			m_speedFactor = gameData.speedFactor;
+			m_undoStack = gameData.undoStack;
+			m_undoPointer = gameData.undoPointer;
 		}
-		updateScore( 0 );
+	}
+
+	function start( settings, isContinue ) {
+		if( !isContinue ) {
+			m_drawMode = settings.draw;
+			m_scoreMode = settings.scoring;
+			m_speedFactor = SPEED_FACTORS[ settings.speed ];
+			reset();
+		}
 		m_isRunning = true;
 		g_uiDrag.setupDragCards(
 			".normal-stack .card-flipped, #main-pile .card-flipped:nth-last-child(1)" +
@@ -42,9 +56,11 @@ let g_sol = ( function () {
 			canPlaceCard,
 			cardMoved
 		);
-		g_ui.createDeck( g_cards.createDeck( true ), $( "#main-deck" ) );
 		g_ui.setSpeed( m_baseSpeed * m_speedFactor );
-		dealDeck();
+		if( !isContinue ) {
+			g_ui.createDeck( g_cards.createDeck( true ), $( "#main-deck" ) );
+			dealDeck();
+		}
 		resize();
 		g_ui.setupDeckClick(
 			$( "#main-deck" ),
@@ -60,6 +76,27 @@ let g_sol = ( function () {
 		);
 		$( window ).on( "resize", onWindowResize );
 		$( window ).on( "keypress", onKeypress );
+	}
+
+	function continueGame( settings ) {
+		if( m_isRunning ) {
+			m_speedFactor = SPEED_FACTORS[ settings.speed ];		
+			unpauseTime();
+		} else {
+			restoreState( m_undoStack[ m_undoStack.length - 1 ] );
+			start( settings, true );
+		}
+	}
+
+	function pause() {
+		let t = ( new Date ).getTime();
+		let elapsed = ( t - m_startTime ) + m_timePrevious;
+		m_timePrevious = elapsed;
+		clearInterval( m_timeInterval );
+	}
+
+	function isGameInProgress() {
+		return m_isRunning || m_undoStack.length > 0;		
 	}
 
 	/*
@@ -94,12 +131,14 @@ let g_sol = ( function () {
 		$( "#main-pile .card" ).each(function () {
 			g_ui.dealCard( $( "#main-pile" ), $mainDeck, true, true );
 		} );
-		setTimeout( function () {
+		let timeout = setTimeout( function () {
 			g_ui.setSpeed( m_baseSpeed * m_speedFactor );
-			setTimeout( function () {
+			let timeout = setTimeout( function () {
 				saveState();
 			}, 50 );
+			m_timeouts.push( timeout );
 		}, m_slowSpeed * m_speedFactor );
+		m_timeouts.push( timeout );
 		m_deckCount += 1;
 		if( m_scoreMode === "Standard" ) {
 			if( m_drawMode === "One" ) {
@@ -114,10 +153,6 @@ let g_sol = ( function () {
 
 	function stackClicked() {
 		var $card, $stack;
-
-		if( !m_isRunning ) {
-			return;
-		}
 
 		$stack = $( this );
 		$card = $stack.children().last();
@@ -206,6 +241,33 @@ let g_sol = ( function () {
 	/*
  		Internal Functions
  	*/
+
+	function reset() {
+		m_undoStack = [];
+		m_undoPointer = 0;
+		$( "#main-deck" ).html( "" );
+		$( ".card:not(#card-placeholder)" ).remove();
+		$( "#table" ).off( "click", ".stack", stackClicked );
+		$( document.body ).off( "dblclick",
+			".normal-stack .card-flipped:nth-last-child(1), #main-pile .card-flipped:nth-last-child(1)",
+			cardDoubleClick
+		);
+		$( window ).off( "resize", onWindowResize );
+		$( window ).off( "keypress", onKeypress );
+		m_timeouts.forEach( function ( timeout ) {
+			clearTimeout( timeout );
+		} );
+		g_ui.reset( $( "#main-deck" ) );
+		g_uiDrag.reset();
+		m_timePrevious = 0;
+		if( m_scoreMode === "Standard" ) {
+			m_score = 0;
+		} else {
+			m_score = -52;
+		}
+		updateScore( 0 );
+		$( "#timer" ).html( "Time: 0" );
+	}
 
 	function resize() {
 		var $table, i, size, left, style, cardWidth, cardHeight, cardPadding, names, width, height;
@@ -329,7 +391,8 @@ let g_sol = ( function () {
 
 	function unpauseTime() {
 		m_startTime = ( new Date ).getTime();
-		setInterval( timeTick, 100 );
+		clearInterval( m_timeInterval );
+		m_timeInterval = setInterval( timeTick, 100 );
 	}
 
 	function timeTick() {
@@ -451,6 +514,14 @@ let g_sol = ( function () {
 	}
 
 	function updateUndoStack() {
+		let gameData = {
+			"drawMode": m_drawMode,
+			"scoreMode": m_scoreMode,
+			"speedFactor": m_speedFactor,
+			"undoStack": m_undoStack,
+			"undoPointer": m_undoPointer
+		};
+		localStorage.setItem( "gameData", JSON.stringify( gameData ) );
 
 		// Clear the undo stack
 		$( "#undo-data" ).html( "" );
