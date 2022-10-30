@@ -101,7 +101,6 @@ let g_uiDrag = (function() {
 		}
 
 		if( m_$dragged ) {
-			//console.log( mouse );
 			offset = m_$dragged.offset();
 			newLeft = offset.left + ( mouse.x- m_mouse.x );
 			newTop = offset.top + ( mouse.y - m_mouse.y );
@@ -114,15 +113,6 @@ let g_uiDrag = (function() {
 			} else {
 				m_$dragged.removeClass( "can-drop-card" );
 			}
-			/*m_$dragged.hide();
-			$elements = $( document.elementFromPoint( mouse.x, mouse.y ) );
-			m_$dragged.show();
-			$stack = $elements.closest( "." + m_stackClass );
-			if( $stack.length > 0 && m_canPlaceCardCmd( $stack, m_$dragged ) ) {
-				m_$dragged.addClass( "can-drop-card" );
-			} else {
-				m_$dragged.removeClass( "can-drop-card" );
-			}*/
 		}
 
 		m_mouse = mouse;
@@ -142,7 +132,7 @@ let g_uiDrag = (function() {
 	}
 
 	function stopDrag() {
-		var $elements, stacks, stack, $stack, pos, $placeholder;
+		var stacks, stack, $stack, pos, $placeholder;
 
 		if( ! m_$dragged || ! m_dragStartPosition || m_startDrag ) {
 			resetDrag();
@@ -165,9 +155,9 @@ let g_uiDrag = (function() {
 			pos = $placeholder.offset();
 			$placeholder.hide();
 			$( "#table" ).append( $placeholder );
-			moveToStack( $stack, pos );
+			moveToStack( $stack, pos, false );
 		} else {
-			moveToStack( m_$dragCancelParent, m_dragStartPosition );
+			moveToStack( m_$dragCancelParent, m_dragStartPosition, true );
 		}		
 	}
 
@@ -199,7 +189,7 @@ let g_uiDrag = (function() {
 		return $selectionBox;
 	}
 
-	function moveToStack( $stack, pos ) {
+	function moveToStack( $stack, pos, isCancelled ) {
 		var speed, offset, dx, dy;
 
 		if( ! m_$dragged || m_isAnimating ) {
@@ -223,7 +213,7 @@ let g_uiDrag = (function() {
 			}
 			m_isAnimating = false;
 			resetDrag();
-			m_onCardPlacedCmd();
+			m_onCardPlacedCmd( m_$dragCancelParent, $stack, isCancelled );
 		} );
 	}
 

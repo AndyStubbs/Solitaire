@@ -1,6 +1,7 @@
 let g_sol = ( function () {
 	"use strict";
 
+	const DRAW_COUNT = { "One": 1, "Three": 3 };
 	let m_baseSpeed = 150;
 	let m_slowSpeed = 500;
 	let m_speedPerPixel = 0.5;
@@ -9,12 +10,26 @@ let g_sol = ( function () {
 	let m_isRunning = false;
 	let m_undoStack = [];
 	let m_undoPointer = 0;
+	let m_startTime = 0;
+	let m_timePrevious = 0;
+	let m_score = 0;
+	let m_drawMode = "One";
+	let m_scoreMode = "Standard";
+	let m_deckCount = 0;
 
 	return {
 		"start": start
 	};
 	
-	function start() {
+	function start( settings ) {
+		m_drawMode = settings.draw;
+		m_scoreMode = settings.scoring;
+		if( m_scoreMode === "Standard" ) {
+			m_score = 0;
+		} else {
+			m_score = -52;
+		}
+		updateScore( 0 );
 		m_isRunning = true;
 		g_uiDrag.setupDragCards(
 			".normal-stack .card-flipped, #main-pile .card-flipped:nth-last-child(1)" +
@@ -31,6 +46,7 @@ let g_sol = ( function () {
 		g_ui.setupDeckClick(
 			$( "#main-deck" ),
 			$( "#main-pile" ),
+			DRAW_COUNT[ m_drawMode ],
 			mainDeckCardDealt,
 			mainDeckResetClicked
 		);
@@ -62,6 +78,16 @@ let g_sol = ( function () {
 				saveState();
 			}, 50 );
 		}, m_slowSpeed );
+		m_deckCount += 1;
+		if( m_scoreMode === "Standard" ) {
+			if( m_drawMode === "One" ) {
+				updateScore( -25 );	
+			} else {
+				if( m_deckCount % 3 === 0 ) {
+					updateScore( -25 );
+				}
+			}
+		}
 	}
 
 	function stackClicked() {
@@ -78,13 +104,17 @@ let g_sol = ( function () {
 			g_ui.onComplete( function () {
 				saveState();
 			} );
+			if( m_scoreMode === "Standard" ) {
+				updateScore( 5 );
+			}
 		}
 	}
 
 	function cardDoubleClick() {
-		var $card, $stacks, i, $stack;
+		var $card, $parent, $stacks, i, $stack;
 
 		$card = $( this );
+		$parent = $card.parent();
 		$stacks = $( ".suit-stack" );
 		for( i = 0; i < $stacks.length; i++ ) {
 			$stack = $( $stacks.get( i ) );
@@ -94,13 +124,39 @@ let g_sol = ( function () {
 					checkSize();
 					saveState();
 				} );
+				if( m_scoreMode === "Standard" ) {
+					if( $parent.hasClass( "main-pile" ) ) {
+						updateScore( 13 );	
+					} else {
+						updateScore( 10 );
+					}
+				} else {
+					updateScore( 5 );	
+				}
 				break;
 			}
 		}
 		g_uiDrag.resetDrag();
 	}
 
-	function cardMoved() {
+	function cardMoved( $src, $dest, isCancelled ) {
+		if( !isCancelled ) {
+			if( $dest.hasClass( "suit-stack" ) && !$src.hasClass( "suit-stack" ) ) {
+				if( m_scoreMode === "Standard" ) {
+					if( $src.hasClass( "main-pile" ) ) {
+						updateScore( 13 );
+					} else {
+						updateScore( 10 );	
+					}
+				} else {
+					updateScore( 5 );
+				}
+			} else if( $src.hasClass( "suit-stack" ) && m_scoreMode === "Standard" ) {
+				updateScore( -13 );
+			} else if( $src.hasClass( "main-pile" ) && m_scoreMode === "Standard" ) {
+				updateScore( 3 );
+			}
+		}
 		checkSize();
 		saveState();
 	}
@@ -244,8 +300,37 @@ let g_sol = ( function () {
 			}
 			g_ui.onComplete( function () {
 				saveState();
+				unpauseTime();
 			} );
 		} );
+	}
+
+	function unpauseTime() {
+		m_startTime = ( new Date ).getTime();
+		setInterval( timeTick, 100 );
+	}
+
+	function timeTick() {
+		let t = ( new Date ).getTime();
+		let elapsed = ( ( t - m_startTime ) + m_timePrevious ) / 1000;
+		$( "#timer" ).html( "Time: " + elapsed.toFixed( 0 ) );
+	}
+
+	function updateScore( change ) {
+		var temp;
+
+		m_score += change;
+		if( m_scoreMode === "Standard" ) {
+			temp = m_score;
+		} else {
+			if( m_score < 0 ) {
+				temp = "<span style='color: red'>" + "-$" + Math.abs( m_score ) + "</span>";
+			} else {
+				temp = m_score;
+			}
+		}
+
+		$( "#score" ).html( "Score: " + temp );
 	}
 
 	function canPlaceCard( $stack, $card ) {
@@ -284,13 +369,16 @@ let g_sol = ( function () {
 	}
 
 	function saveState() {
-		let cards = [];
+		let data = {
+			"score": m_score,
+			"cards": []
+		};
 		$( ".card:not(#card-placeholder)" ).each( function () {
 			if( !this.dataset.card ) {
 				return;
 			}
 			let $card = $( this );
-			cards.push( {
+			data.cards.push( {
 				"value": parseInt( this.dataset.card ),
 				"flip": $card.hasClass( "card-flipped" ),
 				"parentId": $card.parent().get( 0 ).id
@@ -298,9 +386,11 @@ let g_sol = ( function () {
 		} );
 
 		// Make sure the undo stack is not the same as new stack
-		if( m_undoStack.length === 0 || !compareStacks( cards, m_undoStack[ m_undoStack.length - 1 ] ) ) {
-			console.log( "Saving State" );
-			m_undoStack.push( cards );
+		if(
+			m_undoStack.length === 0 ||
+			!compareStacks( data.cards, m_undoStack[ m_undoStack.length - 1 ].cards )
+		) {
+			m_undoStack.push( data );
 			m_undoPointer = m_undoStack.length - 2;
 			updateUndoStack();
 		}
@@ -320,18 +410,20 @@ let g_sol = ( function () {
 		return true;
 	}
 
-	function restoreState( cards ) {
+	function restoreState( data ) {
 		g_uiDrag.resetDrag();
 
 		$( ".card:not(#card-placeholder)" ).remove();
-		for( let i = 0; i < cards.length; i++ ) {
-			let data = cards[ i ];
-			let $card = $( g_ui.createCard( data.value ) );
-			if( data.flip ) {
+		for( let i = 0; i < data.cards.length; i++ ) {
+			let cardData = data.cards[ i ];
+			let $card = $( g_ui.createCard( cardData.value ) );
+			if( cardData.flip ) {
 				$card.addClass( "card-flipped" );
 			}
-			$( "#" + data.parentId ).append( $card );
+			$( "#" + cardData.parentId ).append( $card );
 		}
+		m_score = data.score;
+		updateScore( 0 );
 		resize();
 		checkSize();
 	}

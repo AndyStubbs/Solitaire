@@ -63,6 +63,7 @@
 }
 
 #undo-data {
+	display: none;
 	text-decoration: underline;
 	cursor: pointer;
 	color: white;

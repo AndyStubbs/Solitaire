@@ -57,8 +57,8 @@ let g_ui = (function() {
 		m_onCompleteCommands.push( cmd );
 	}
 
-	function setupDeckClick( $src, $dest, onCardDealt, onEmptyCmd ) {
-		m_deckClickedParams = [ $src, $dest, onCardDealt, onEmptyCmd ];
+	function setupDeckClick( $src, $dest, dealCount, onCardDealt, onEmptyCmd ) {
+		m_deckClickedParams = [ $src, $dest, dealCount, onCardDealt, onEmptyCmd ];
 		$src.on( "click", deckClicked );
 	}
 
@@ -72,18 +72,21 @@ let g_ui = (function() {
  	*/
 
 	function deckClicked() {
-		let $src, $dest, onCardDealt, onEmptyCmd;
+		let $src, $dest, dealCount, onCardDealt, onEmptyCmd;
 		$src = m_deckClickedParams[ 0 ];
 		$dest = m_deckClickedParams[ 1 ];
-		onCardDealt = m_deckClickedParams[ 2 ];
-		onEmptyCmd = m_deckClickedParams[ 3 ];
+		dealCount = m_deckClickedParams[ 2 ];
+		onCardDealt = m_deckClickedParams[ 3 ];
+		onEmptyCmd = m_deckClickedParams[ 4 ];
 		
 		if ( $src.children().length === 0 ) {
 			onEmptyCmd();
 			return;
 		}
 
-		dealCard( $src, $dest, true );
+		for( let i = 0; i < dealCount; i++ ) {
+			dealCard( $src, $dest, true );	
+		}
 		onComplete( onCardDealt );
 	}
 

@@ -20,7 +20,7 @@ let g_menu = ( function() {
 		$( "#menu" ).show();
 		$( "#btn-start" ).on( "click", function() {
 			$( "#menu" ).hide();
-			g_sol.start();
+			g_sol.start( m_settings );
 			if( g_util.isMobile() ) {
 				g_util.openFullscreen( document.body );
 				if ( "orientation" in screen ) {
