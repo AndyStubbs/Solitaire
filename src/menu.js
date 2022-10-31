@@ -26,6 +26,7 @@ let g_menu = ( function() {
 		$( "#menu" ).show();
 		$( "#btn-menu" ).on( "click", function () {
 			g_sol.pause();
+			$( "#game-over" ).hide();
 			$( "#menu" ).slideToggle();
 			if( g_sol.isGameInProgress() ) {
 				$( "#btn-continue" ).show();

@@ -184,6 +184,6 @@ let g_ui = (function() {
 				temp[ i ]();
 			}
 		}
-		console.log( m_animations );
 	}
+
 })();

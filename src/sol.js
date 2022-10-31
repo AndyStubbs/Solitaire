@@ -20,6 +20,8 @@ let g_sol = ( function () {
 	let m_deckCount = 0;
 	let m_timeInterval = null;
 	let m_timeouts = [];
+	let m_winInterval = null;
+	let m_isPaused = true;
 
 	return {
 		"init": init,
@@ -37,6 +39,7 @@ let g_sol = ( function () {
 			m_speedFactor = gameData.speedFactor;
 			m_undoStack = gameData.undoStack;
 			m_undoPointer = gameData.undoPointer;
+			m_timePrevious = gameData.elapsedTime;
 		}
 	}
 
@@ -85,14 +88,20 @@ let g_sol = ( function () {
 		} else {
 			restoreState( m_undoStack[ m_undoStack.length - 1 ] );
 			start( settings, true );
+			mainDeckChecks();
+			unpauseTime();
 		}
 	}
 
 	function pause() {
-		let t = ( new Date ).getTime();
-		let elapsed = ( t - m_startTime ) + m_timePrevious;
-		m_timePrevious = elapsed;
+		if( ! m_isPaused ) {
+			let t = ( new Date ).getTime();
+			let elapsed = ( t - m_startTime ) + m_timePrevious;
+			m_timePrevious = elapsed;
+		}
+		m_isPaused = true;
 		clearInterval( m_timeInterval );
+		clearInterval( m_winInterval );
 	}
 
 	function isGameInProgress() {
@@ -104,23 +113,7 @@ let g_sol = ( function () {
  	*/
 
 	function mainDeckCardDealt() {	
-		if( m_scoreMode === "Vegas" ) {
-			if( $( "#main-deck .card" ).length === 0 ) {
-				let $mainDeck = $( "#main-deck" );
-				if( m_drawMode === "One" || m_deckCount === 2 ) {
-					g_ui.disableDeckClick( $mainDeck );
-					$mainDeck.css( "cursor", "default" );
-					$mainDeck.append( "<span style='color: red;'>X</span>" );
-				} else {
-					$mainDeck.append( "<span style='color: green;'>" + ( m_deckCount + 1 ) + "</span>" );
-				}
-			}
-		} else {
-			if( $( "#main-deck .card" ).length === 0 ) {
-				let $mainDeck = $( "#main-deck" );				
-				$mainDeck.append( "<span style='color: green;'>" + ( m_deckCount + 1 ) + "</span>" );
-			}
-		}
+		mainDeckChecks();
 		saveState();
 	}
 
@@ -168,32 +161,10 @@ let g_sol = ( function () {
 	}
 
 	function cardDoubleClick() {
-		var $card, $parent, $stacks, i, $stack;
+		var $card;
 
 		$card = $( this );
-		$parent = $card.parent();
-		$stacks = $( ".suit-stack" );
-		for( i = 0; i < $stacks.length; i++ ) {
-			$stack = $( $stacks.get( i ) );
-			if( canPlaceCard( $stack, $card ) ) {
-				g_ui.dealCard( $card.parent(), $stack );
-				g_ui.onComplete( function () {
-					checkSize();
-					saveState();
-				} );
-				if( m_scoreMode === "Standard" ) {
-					if( $parent.hasClass( "main-pile" ) ) {
-						updateScore( 13 );	
-					} else {
-						updateScore( 10 );
-					}
-				} else {
-					updateScore( 5 );	
-				}
-				break;
-			}
-		}
-		g_uiDrag.resetDrag();
+		checkCardForAutoPlay( $card );
 	}
 
 	function cardMoved( $src, $dest, isCancelled ) {
@@ -236,17 +207,156 @@ let g_sol = ( function () {
 			}
 			updateUndoStack();
 		}
+		if( e.key.toLowerCase() === "y" && e.ctrlKey ) {
+			$( "#suit-1" ).append( $( ".card:not(#card-placeholder)" ) );
+			saveState();
+		}
 	}
 
 	/*
  		Internal Functions
  	*/
 
+	function checkCardForAutoPlay( $card, onComplete ) {
+		var $parent, $stacks, i, $stack;
+
+		$parent = $card.parent();
+		$stacks = $( ".suit-stack" );
+		for( i = 0; i < $stacks.length; i++ ) {
+			$stack = $( $stacks.get( i ) );
+			if( canPlaceCard( $stack, $card ) ) {
+				g_ui.dealCard( $card.parent(), $stack );
+				g_ui.onComplete( function () {
+					checkSize();
+					saveState();
+					if( onComplete ) {
+						onComplete();
+					}
+				} );
+				if( m_scoreMode === "Standard" ) {
+					if( $parent.hasClass( "main-pile" ) ) {
+						updateScore( 13 );	
+					} else {
+						updateScore( 10 );
+					}
+				} else {
+					updateScore( 5 );	
+				}
+				break;
+			}
+		}
+		g_uiDrag.resetDrag();
+	}
+
+	function checkForAutoPlay() {
+		let minCard = 100;
+		$( ".suit-stack" ).each( function () {
+			if( minCard === null ) {
+				return;
+			}
+			let $topCard = $( this ).children().last();
+			if( $topCard.length > 0 ) {
+				let top = g_cards.getNumber( parseInt( $topCard.get( 0 ).dataset.card ) );
+				if( top < minCard ) {
+					minCard = top;
+				}
+			} else {
+				minCard = null;
+			}
+		} );
+		if( minCard !== null ) {
+			$( ".normal-stack" ).each( function () {
+				let $topCard = $( this ).children().last();
+				if( $topCard.length > 0 && $topCard.hasClass( "card-flipped" ) ) {
+					let cardValue = g_cards.getNumber( parseInt( $topCard.get( 0 ).dataset.card ) );
+					if( cardValue === minCard + 1 ) {
+						checkCardForAutoPlay( $topCard );
+					}
+				}
+			} );
+		}
+	}
+
+	function checkForWin() {
+		if( $( "#suit-stacks .card" ).length === 52 ) {
+			m_isRunning = false;
+			resetInput();
+			m_undoStack = [];
+			m_undoPointer = 0;
+			pause();
+			$( "#game-over" ).fadeIn();
+			m_winInterval = setInterval( winAnimation, 100 );
+		}
+	}
+
+	function winAnimation() {
+		let $window = $( window );
+		let height = $window.height();
+  		let width = $window.width();
+		let topHeight = $( "#score-bar" ).height();
+		$( "#game-over" ).css( "top", topHeight );
+		$( "#game-over h1" ).css( "top", "calc(50% - " + ( topHeight + 80 ) + "px)" );
+		$( "#suit-stacks .card" ).each( function () {
+			if( Math.random() > 0.15 ) {
+				return;
+			}
+			let $card = $( this );
+			let offset = $card.offset();
+			$card.css( "position", "fixed" );
+			$card.css( "left", offset.left );
+			$card.css( "top", offset.top );
+			$card.animate( {
+				"left": Math.floor( ( width - $card.width() ) * Math.random() ),
+				"top": Math.floor(
+					( height - $card.find( ".card-part" ).height() - topHeight ) * Math.random()
+				) + topHeight
+			}, Math.round( Math.random() * 2000 ) + 2000 );
+		} );
+	}
+
+	function mainDeckChecks() {
+		if( m_scoreMode === "Vegas" ) {
+			if( $( "#main-deck .card" ).length === 0 ) {
+				let $mainDeck = $( "#main-deck" );
+				if( m_drawMode === "One" || m_deckCount === 2 ) {
+					g_ui.disableDeckClick( $mainDeck );
+					$mainDeck.css( "cursor", "default" );
+					$mainDeck.append( "<span style='color: red;'>X</span>" );
+				} else {
+					$mainDeck.append( "<span style='color: green;'>" + ( m_deckCount + 1 ) + "</span>" );
+				}
+			}
+		} else {
+			if( $( "#main-deck .card" ).length === 0 ) {
+				let $mainDeck = $( "#main-deck" );
+				if( $( "#main-pile .card" ).length === 0 ) {
+					g_ui.disableDeckClick( $mainDeck );
+					$mainDeck.css( "cursor", "default" );
+					$mainDeck.append( "<span style='color: red;'>X</span>" );
+				} else {
+					$mainDeck.append( "<span style='color: green;'>" + ( m_deckCount + 1 ) + "</span>" );	
+				}
+			}
+		}
+	}
+
 	function reset() {
 		m_undoStack = [];
 		m_undoPointer = 0;
 		$( "#main-deck" ).html( "" );
 		$( ".card:not(#card-placeholder)" ).remove();
+		resetInput();
+		m_timePrevious = 0;
+		if( m_scoreMode === "Standard" ) {
+			m_score = 0;
+		} else {
+			m_score = -52;
+		}
+		updateScore( 0 );
+		$( "#timer" ).html( "Time: 0" );
+	}
+
+	function resetInput() {
 		$( "#table" ).off( "click", ".stack", stackClicked );
 		$( document.body ).off( "dblclick",
 			".normal-stack .card-flipped:nth-last-child(1), #main-pile .card-flipped:nth-last-child(1)",
@@ -259,14 +369,6 @@ let g_sol = ( function () {
 		} );
 		g_ui.reset( $( "#main-deck" ) );
 		g_uiDrag.reset();
-		m_timePrevious = 0;
-		if( m_scoreMode === "Standard" ) {
-			m_score = 0;
-		} else {
-			m_score = -52;
-		}
-		updateScore( 0 );
-		$( "#timer" ).html( "Time: 0" );
 	}
 
 	function resize() {
@@ -393,6 +495,7 @@ let g_sol = ( function () {
 		m_startTime = ( new Date ).getTime();
 		clearInterval( m_timeInterval );
 		m_timeInterval = setInterval( timeTick, 100 );
+		m_isPaused = false;
 	}
 
 	function timeTick() {
@@ -477,7 +580,9 @@ let g_sol = ( function () {
 		) {
 			m_undoStack.push( data );
 			m_undoPointer = m_undoStack.length - 2;
+			checkForWin();
 			updateUndoStack();
+			checkForAutoPlay();
 		}
 	}
 
@@ -514,12 +619,15 @@ let g_sol = ( function () {
 	}
 
 	function updateUndoStack() {
+		let t = ( new Date ).getTime();
+		let elapsedTime = ( t - m_startTime ) + m_timePrevious;
 		let gameData = {
 			"drawMode": m_drawMode,
 			"scoreMode": m_scoreMode,
 			"speedFactor": m_speedFactor,
 			"undoStack": m_undoStack,
-			"undoPointer": m_undoPointer
+			"undoPointer": m_undoPointer,
+			"elapsedTime": elapsedTime
 		};
 		localStorage.setItem( "gameData", JSON.stringify( gameData ) );
 
