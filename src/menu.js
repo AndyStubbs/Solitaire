@@ -30,6 +30,8 @@ let g_menu = ( function() {
 			$( "#menu" ).slideToggle();
 			if( g_sol.isGameInProgress() ) {
 				$( "#btn-continue" ).show();
+			} else {
+				$( "#btn-continue" ).hide();
 			}
 		} );
 		$( "#btn-start" ).on( "click", function() {

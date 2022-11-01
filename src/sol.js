@@ -45,6 +45,9 @@ let g_sol = ( function () {
 
 	function start( settings, isContinue ) {
 		if( !isContinue ) {
+			if( isGameInProgress() ) {
+				endGame( false );
+			}
 			m_drawMode = settings.draw;
 			m_scoreMode = settings.scoring;
 			m_speedFactor = SPEED_FACTORS[ settings.speed ];
@@ -88,7 +91,6 @@ let g_sol = ( function () {
 		} else {
 			restoreState( m_undoStack[ m_undoStack.length - 1 ] );
 			start( settings, true );
-			mainDeckChecks();
 			unpauseTime();
 		}
 	}
@@ -279,6 +281,7 @@ let g_sol = ( function () {
 
 	function checkForWin() {
 		if( $( "#suit-stacks .card" ).length === 52 ) {
+			endGame( true );
 			m_isRunning = false;
 			resetInput();
 			m_undoStack = [];
@@ -287,6 +290,24 @@ let g_sol = ( function () {
 			$( "#game-over" ).fadeIn();
 			m_winInterval = setInterval( winAnimation, 100 );
 		}
+	}
+
+	function endGame( isWin ) {
+		let gameStats = JSON.parse( localStorage.getItem( "gameStats" ) );
+		if( gameStats === null ) {
+			gameStats = [];
+		}
+		let t = ( new Date ).getTime();
+		let elapsed = ( ( t - m_startTime ) + m_timePrevious ) / 1000;
+		gameStats.push( {
+			"date": ( new Date() ).getTime,
+			"score": m_score,
+			"time": elapsed,
+			"deckCount": m_deckCount,
+			"isWin": isWin,
+			"cards": m_undoStack[ 0 ]
+		} );
+		localStorage.setItem( "gameStats", JSON.stringify( gameStats ) );
 	}
 
 	function winAnimation() {
@@ -343,6 +364,7 @@ let g_sol = ( function () {
 	function reset() {
 		m_undoStack = [];
 		m_undoPointer = 0;
+		m_deckCount = 0;
 		$( "#main-deck" ).html( "" );
 		$( ".card:not(#card-placeholder)" ).remove();
 		resetInput();
@@ -559,6 +581,7 @@ let g_sol = ( function () {
 	function saveState() {
 		let data = {
 			"score": m_score,
+			"deckCount": m_deckCount,
 			"cards": []
 		};
 		$( ".card:not(#card-placeholder)" ).each( function () {
@@ -604,6 +627,7 @@ let g_sol = ( function () {
 		g_uiDrag.resetDrag();
 
 		$( ".card:not(#card-placeholder)" ).remove();
+		$( "#main-deck" ).html( "" );
 		for( let i = 0; i < data.cards.length; i++ ) {
 			let cardData = data.cards[ i ];
 			let $card = $( g_ui.createCard( cardData.value ) );
@@ -613,6 +637,8 @@ let g_sol = ( function () {
 			$( "#" + cardData.parentId ).append( $card );
 		}
 		m_score = data.score;
+		m_deckCount = data.deckCount;
+		mainDeckChecks();
 		updateScore( 0 );
 		resize();
 		checkSize();
