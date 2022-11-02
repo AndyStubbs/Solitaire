@@ -82,6 +82,7 @@ let g_sol = ( function () {
 		);
 		$( window ).on( "resize", onWindowResize );
 		$( window ).on( "keypress", onKeypress );
+		$( "#btn-undo" ).on( "click", undo );
 	}
 
 	function continueGame( settings ) {
@@ -199,15 +200,7 @@ let g_sol = ( function () {
 
 	function onKeypress( e ) {
 		if( e.key.toLowerCase() === "z" && e.ctrlKey ) {
-			if( m_undoPointer >= m_undoStack.length || m_undoPointer < 0 ) {
-				return;
-			}
-			restoreState( m_undoStack[ m_undoPointer ] );
-			m_undoPointer -= 1;
-			for( let i = m_undoPointer + 1; i < m_undoStack.length; i++ ) {
-				m_undoStack.pop();
-			}
-			updateUndoStack();
+			undo();
 		}
 		if( e.key.toLowerCase() === "y" && e.ctrlKey ) {
 			$( "#suit-1" ).append( $( ".card:not(#card-placeholder)" ) );
@@ -218,6 +211,18 @@ let g_sol = ( function () {
 	/*
  		Internal Functions
  	*/
+
+	function undo() {
+		if( m_undoPointer >= m_undoStack.length || m_undoPointer < 0 ) {
+			return;
+		}
+		restoreState( m_undoStack[ m_undoPointer ] );
+		m_undoPointer -= 1;
+		for( let i = m_undoPointer + 1; i < m_undoStack.length; i++ ) {
+			m_undoStack.pop();
+		}
+		updateUndoStack();
+	}
 
 	function checkCardForAutoPlay( $card, onComplete ) {
 		var $parent, $stacks, i, $stack;
@@ -391,6 +396,7 @@ let g_sol = ( function () {
 		} );
 		g_ui.reset( $( "#main-deck" ) );
 		g_uiDrag.reset();
+		$( "#btn-undo" ).off( "click", undo );
 	}
 
 	function resize() {

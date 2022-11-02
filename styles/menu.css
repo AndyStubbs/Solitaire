@@ -155,3 +155,20 @@
 	55% { opacity: 0.95; }
 	100% { opacity: 0; }
 }
+
+#btn-undo {
+	position: absolute;
+    right: 15px;
+    bottom: 15px;
+    font-size: 48px;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(255,255,255,0.25);
+    /* rotate: 270deg; */
+    line-height: 50px;
+    padding: 0;
+    color: darkmagenta;
+	-webkit-text-stroke: 1px black;
+    text-stroke: 1px black;
+	font-weight: bold;
+}
