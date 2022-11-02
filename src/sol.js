@@ -22,6 +22,7 @@ let g_sol = ( function () {
 	let m_timeouts = [];
 	let m_winInterval = null;
 	let m_isPaused = true;
+	let m_doubleClicked = false;
 
 	return {
 		"init": init,
@@ -76,9 +77,14 @@ let g_sol = ( function () {
 			mainDeckResetClicked
 		);
 		$( "#table" ).on( "click", ".stack", stackClicked );
-		$( document.body ).on( "dblclick",
+		//$( document.body ).on( "dblclick",
+		//	".normal-stack .card-flipped:nth-last-child(1), #main-pile .card-flipped:nth-last-child(1)",
+		//	cardDoubleClick
+		//);
+    	$( document.body ).on(
+			"click",
 			".normal-stack .card-flipped:nth-last-child(1), #main-pile .card-flipped:nth-last-child(1)",
-			cardDoubleClick
+			cardClick
 		);
 		$( window ).on( "resize", onWindowResize );
 		$( window ).on( "keypress", onKeypress );
@@ -163,10 +169,17 @@ let g_sol = ( function () {
 		}
 	}
 
-	function cardDoubleClick() {
-		var $card;
+	function cardClick() {
+		if( m_doubleClicked ) {
+			cardDoubleClick( $( this ) );
+		}
+		m_doubleClicked = true;
+		setTimeout( () => {
+			m_doubleClicked = false;
+		}, 300 );		
+	}
 
-		$card = $( this );
+	function cardDoubleClick( $card ) {
 		checkCardForAutoPlay( $card );
 	}
 
@@ -385,9 +398,14 @@ let g_sol = ( function () {
 
 	function resetInput() {
 		$( "#table" ).off( "click", ".stack", stackClicked );
-		$( document.body ).off( "dblclick",
+		//$( document.body ).off( "dblclick",
+		//	".normal-stack .card-flipped:nth-last-child(1), #main-pile .card-flipped:nth-last-child(1)",
+		//	cardDoubleClick
+		//);
+		$( document.body ).off(
+			"click",
 			".normal-stack .card-flipped:nth-last-child(1), #main-pile .card-flipped:nth-last-child(1)",
-			cardDoubleClick
+			cardClick
 		);
 		$( window ).off( "resize", onWindowResize );
 		$( window ).off( "keypress", onKeypress );

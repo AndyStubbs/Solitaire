@@ -78,7 +78,7 @@ let g_uiDrag = (function() {
 		m_startDrag = true;
 	}
 
-	function touchStart() {
+	function touchStart( e ) {
 		m_mouse = {
 			"x": e.changedTouches[ 0 ].pageX,
 			"y": e.changedTouches[ 0 ].pageY
