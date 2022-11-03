@@ -51,6 +51,15 @@ let g_menu = ( function() {
 			$( "#select-scoring" ).val( m_settings.scoring );
 			$( "#select-speed" ).val( m_settings.speed );
 		} );
+		$( "#btn-stats" ).on( "click", function () {
+			calcStats();
+			$( "#menu-main" ).fadeTo( 300, 0 );
+			$( "#menu-stats" ).slideToggle();
+		} );
+		$( "#btn-back" ).on( "click", function () {
+			$( "#menu-main" ).fadeTo( 500, 1 );
+			$( "#menu-stats" ).slideToggle();
+		} );
 		$( "#btn-ok" ).on( "click", function () {
 			m_settings.draw = $( "#select-draw" ).val();
 			m_settings.scoring = $( "#select-scoring" ).val();
@@ -122,9 +131,84 @@ let g_menu = ( function() {
 		}
 	}
 
+	function calcStats() {
+		let gameStats = JSON.parse( localStorage.getItem( "gameStats" ) );
+		/*
+  			gameStats.push( {
+			"date": ( new Date() ).getTime,
+			"mode": m_scoreMode,
+			"score": score,
+			"time": elapsed,
+			"deckCount": m_deckCount,
+			"isWin": isWin,
+			//"cards": m_undoStack[ 0 ]
+		} );
+  		*/
+		gameStats.sort( ( a, b ) => a.date - b.date );
+		let stdGp = 0;
+		let stdWin = 0;
+		let stdBest = 0;
+		let vegGp = 0;
+		let vegWin = 0;
+		let vegBest = 0;
+		let vegPeak = -9999;
+		let vegCurrent = 0;
+		let $tbody = $( "#tbl-stats tbody" );
+		$tbody.html( "" );
+		for( let i = 0; i < gameStats.length; i++ ) {
+			let game = gameStats[ i ];
+			if( game.mode === "Standard" ) {
+				stdGp += 1;
+				if( game.win ) {
+					stdWin += 1;
+				}
+				if( game.score > stdBest ) {
+					stdBest = game.score;
+				}
+			} else {
+				vegGp += 1;
+				if( game.win ) {
+					vegWin += 1;
+				}
+				if( game.score > vegBest ) {
+					vegBest = game.score;
+				}
+				vegCurrent += game.score;
+				if( vegCurrent > vegPeak ) {
+					vegPeak = vegCurrent;
+				}
+			}
+			let $tr = $( "<tr>" );
+			$tr.append( $( "<td>" ).append( g_util.formatDate( new Date( game.date ) ) ) );
+			$tr.append( $( "<td>" ).append( game.mode ) );
+			$tr.append( $( "<td>" ).append( game.score ) );
+			$tr.append( $( "<td>" ).append( game.elapsed ) );
+			$tr.append( $( "<td>" ).append( game.deckCount ) );
+			$tr.append( $( "<td>" ).append( game.isWin ) );
+			$tbody.append( $tr );
+		}
+
+		$( "#std-gp" ).text( stdGp );
+		$( "#std-win" ).text( stdWin );
+		$( "#std-best" ).text( stdBest );
+		if( stdGp > 0 ) {
+			$( "#std-pct" ).text( stdWin / stdGp + "%" );
+		} else {
+			$( "#std-pct" ).text( "" );
+		}
+		$( "#veg-gp" ).text( vegGp );
+		$( "#veg-win" ).text( vegWin );
+		$( "#veg-best" ).text( vegBest );
+		$( "#veg-peak" ).text( vegPeak );
+		$( "#veg-cur" ).text( vegCurrent );
+		if( vegGp > 0 ) {
+			$( "#veg-pct" ).text( vegWin / vegGp + "%" );
+		} else {
+			$( "#veg-pct" ).text( "" );
+		}
+	}
 })();
 
 $( window ).on( "load", function() {
-	// TODO: Add loading screen and hide it here
 	g_menu.init();
 } );

@@ -15,6 +15,7 @@ let g_sol = ( function () {
 	let m_startTime = 0;
 	let m_timePrevious = 0;
 	let m_score = 0;
+	let m_vegasScore = null;
 	let m_drawMode = "One";
 	let m_scoreMode = "Standard";
 	let m_deckCount = 0;
@@ -201,6 +202,7 @@ let g_sol = ( function () {
 				updateScore( 3 );
 			}
 		}
+		mainDeckChecks();
 		checkSize();
 		saveState();
 	}
@@ -317,13 +319,18 @@ let g_sol = ( function () {
 		}
 		let t = ( new Date ).getTime();
 		let elapsed = ( ( t - m_startTime ) + m_timePrevious ) / 1000;
+		let score = m_score;
+		if( m_scoreMode === "Vegas" ) {
+			score = m_vegasScore - m_vegasStartScore;
+		}
 		gameStats.push( {
-			"date": ( new Date() ).getTime,
-			"score": m_score,
+			"date": ( new Date() ).getTime(),
+			"mode": m_scoreMode,
+			"score": score,
 			"time": elapsed,
 			"deckCount": m_deckCount,
 			"isWin": isWin,
-			"cards": m_undoStack[ 0 ]
+			//"cards": m_undoStack[ 0 ]
 		} );
 		localStorage.setItem( "gameStats", JSON.stringify( gameStats ) );
 	}
@@ -390,7 +397,11 @@ let g_sol = ( function () {
 		if( m_scoreMode === "Standard" ) {
 			m_score = 0;
 		} else {
-			m_score = -52;
+			if( m_vegasScore === null ) {
+				m_vegasScore = 0;
+			}
+			m_vegasScore -= 52;
+			m_vegasStartScore = m_vegasScore;
 		}
 		updateScore( 0 );
 		$( "#timer" ).html( "Time: 0" );
@@ -553,14 +564,15 @@ let g_sol = ( function () {
 	function updateScore( change ) {
 		var temp;
 
-		m_score += change;
 		if( m_scoreMode === "Standard" ) {
+			m_score += change;
 			temp = m_score;
 		} else {
-			if( m_score < 0 ) {
-				temp = "<span style='color: red'>" + "-$" + Math.abs( m_score ) + "</span>";
+			m_vegasScore += change;
+			if( m_vegasScore < 0 ) {
+				temp = "<span style='color: red'>" + "-$" + Math.abs( m_vegasScore ) + "</span>";
 			} else {
-				temp = m_score;
+				temp = m_vegasScore;
 			}
 		}
 
@@ -605,6 +617,7 @@ let g_sol = ( function () {
 	function saveState() {
 		let data = {
 			"score": m_score,
+			"vegasScore": m_vegasScore,
 			"deckCount": m_deckCount,
 			"cards": []
 		};
@@ -661,7 +674,8 @@ let g_sol = ( function () {
 			$( "#" + cardData.parentId ).append( $card );
 		}
 		m_score = data.score;
-		m_deckCount = data.deckCount;
+		m_vegasScore = data.vegasScore;
+		m_deckCount = data.deckCount;		
 		mainDeckChecks();
 		updateScore( 0 );
 		resize();

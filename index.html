@@ -9,11 +9,13 @@
 	<link rel="stylesheet" href="styles/cards.css" type="text/css" />
 	<link rel="stylesheet" href="styles/cards-full.css" type="text/css" />
 	<link rel="stylesheet" href="styles/cards-sizes.css" type="text/css" />
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" type="text/css" />
 	<script
 		src="https://code.jquery.com/jquery-3.6.1.min.js"
 		integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
 		crossorigin="anonymous">
 	</script>
+	<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
 	<div id="loading-overlay">
@@ -28,6 +30,7 @@
 			<input id="btn-start" type="button" value="New Game" class="button" />
 			<input id="btn-continue" type="button" value="Continue" class="button" />
 			<input id="btn-settings" type="button" value="Settings" class="button" />
+			<input id="btn-stats" type="button" value="Stats" class="button" />
 		</div>
 		<div id="menu-settings">
 			<p>
@@ -54,6 +57,41 @@
 			</p>
 			<input id="btn-ok" type="button" value="Ok" class="button" />
 			<input id="btn-cancel" type="button" value="Cancel" class="button" />
+		</div>
+		<div id="menu-stats">
+			<input id="btn-back" type="button" value="<- Back" class="button" />
+			<div class="stats-data">
+				<div>
+					<h2>Standard Mode</h2>
+					<p><label>Played:</label> <span id="std-gp">32</span></p>
+					<p><label>Won:</label> <span id="std-win">16</span></p>
+					<p><label>Win Pct:</label> <span id="std-pct">50%</span></p>
+					<p><label>Best Score:</label> <span id="std-best">700</span></p>
+				</div>
+				<div>
+					<h2>Vegas Mode</h2>
+					<p><label>Played:</label> <span id="veg-gp">32</span></p>
+					<p><label>Won:</label> <span id="veg-win">16</span></p>
+					<p><label>Win Pct:</label> <span id="veg-pct">50%</span></p>
+					<p><label>Best Score:</label> <span id="veg-best">$78</span></p>
+					<p><label>Peak Score:</label> <span id="veg-peak">$135</span></p>
+					<p><label>Current Score:</label> <span id="veg-cur">-$158</span></p>
+				</div>
+			</div>
+			<div class="stats-table">
+				<h2>Games</h2>
+				<table id="tbl-stats">
+					<thead>
+						<th>Date</th>
+						<th>Mode</th>
+						<th>Score</th>
+						<th>Time</th>
+						<th>Decks</th>
+						<th>Win</th>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 	<img src="img/cards.png" style="display: none;" alt="no show" />

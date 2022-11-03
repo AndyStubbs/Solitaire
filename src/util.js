@@ -4,7 +4,9 @@ let g_util = (function() {
 		"isMobile": isMobile,
 		"openFullscreen": openFullscreen,
 		"areElementsOverlapped": areElementsOverlapped,
-		"findNearestElementFromList": findNearestElementFromList
+		"findNearestElementFromList": findNearestElementFromList,
+		"formatDate": formatDate,
+		"padTo2Digits": padTo2Digits
 	};
 
 	function isFunction( functionToCheck ) {
@@ -67,5 +69,16 @@ let g_util = (function() {
 
 		return element;
 	}
+	
+	function formatDate( date ) {
+	  return [
+	    date.getFullYear(),
+	    padTo2Digits( date.getMonth() + 1 ),
+	    padTo2Digits( date.getDate() ),
+	  ].join( "-" );
+	}
 
+	function padTo2Digits( num ) {
+  		return num.toString().padStart( 2, "0" );
+	}
 })();

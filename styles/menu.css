@@ -31,7 +31,7 @@
 	background-image: url("../img/table.jpg");
 }
 
-#menu div {
+#menu > div {
 	margin: auto;
 	height: 220px;
 	transform: translateY(-50%);
@@ -65,6 +65,37 @@
 #menu-settings select {
 	width: 150px;
 	padding: 5px;
+}
+
+#menu #menu-stats {
+	display: none;
+	height: 500px;
+}
+
+.stats-data {
+	display: flex;
+    justify-content: center;
+}
+
+.stats-data div {
+	text-align: left;
+	padding: 0 25px;
+}
+
+.stats-data p {
+	margin: 0;
+}
+
+.stats-table {
+	display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+#menu-stats table {
+	text-align: center;
 }
 
 #game-over {
