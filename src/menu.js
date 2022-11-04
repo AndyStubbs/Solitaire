@@ -6,18 +6,20 @@ let g_menu = ( function() {
 		"state": "hidden"
 	};
 
-	let m_settings = {
-		"draw": "One",
-		"scoring": "Standard",
-		"speed": "Normal"
-	};
+	let m_settings = null;
+	let m_tableHtml = null;
 
 	return {
 		"init": init,
-		"resize": resize
+		"resize": resize,
+		"getVegasStartScore": function () {
+			return m_settings.vegasStartScore;
+		},
+		"setVegasStartScore": setVegasStartScore
 	};
 
 	function init() {
+		initSettings();
 		$( "#loading-overlay" ).fadeOut();
 		g_sol.init();
 		if( !g_sol.isGameInProgress() ) {
@@ -26,13 +28,11 @@ let g_menu = ( function() {
 		$( "#menu" ).show();
 		$( "#btn-menu" ).on( "click", function () {
 			g_sol.pause();
-			$( "#game-over" ).hide();
-			$( "#menu" ).slideToggle();
-			if( g_sol.isGameInProgress() ) {
-				$( "#btn-continue" ).show();
-			} else {
-				$( "#btn-continue" ).hide();
-			}
+			showMenu();
+		} );
+		$( "#btn-end-game" ).on( "click", function () {
+			g_sol.endGame( false );
+			showMenu();
 		} );
 		$( "#btn-start" ).on( "click", function() {
 			$( "#menu" ).slideToggle();
@@ -57,13 +57,41 @@ let g_menu = ( function() {
 			$( "#menu-stats" ).slideToggle();
 		} );
 		$( "#btn-back" ).on( "click", function () {
+			if( g_sol.isGameInProgress() ) {
+				$( "#btn-continue" ).show();
+			} else {
+				$( "#btn-continue" ).hide();
+			}
 			$( "#menu-main" ).fadeTo( 500, 1 );
 			$( "#menu-stats" ).slideToggle();
+		} );
+		$( "#btn-reset" ).on( "click", function () {
+			if( confirm( "Are you sure you want to reset all your stats?" ) ) {
+				g_sol.endGame( false );
+				localStorage.removeItem( "gameStats" );
+				$( "#menu-stats" ).fadeTo( 500, 0 );
+				setTimeout( () => {
+					$( "#menu-stats" ).fadeTo( 500, 1 );
+					calcStats();
+				}, 500 );
+			}			
+		} );
+		$( "#btn-reset-vegas" ).on( "click", function () {
+			if( g_sol.isGameInProgress() && g_sol.getScoreMode() === "Vegas" ) {
+				g_sol.endGame( false );
+			}
+			setVegasStartScore( 0 );
+			$( "#menu-stats" ).fadeTo( 500, 0 );
+			setTimeout( () => {
+				$( "#menu-stats" ).fadeTo( 500, 1 );
+				calcStats();
+			}, 500 );
 		} );
 		$( "#btn-ok" ).on( "click", function () {
 			m_settings.draw = $( "#select-draw" ).val();
 			m_settings.scoring = $( "#select-scoring" ).val();
 			m_settings.speed = $( "#select-speed" ).val();
+			saveSettings();
 			$( "#menu-main" ).fadeTo( 500, 1 );
 			$( "#menu-settings" ).slideToggle();
 		} );
@@ -73,6 +101,38 @@ let g_menu = ( function() {
 		} );
 		$( "#score-bar" ).on( "click", scoreBarClicked );
 		$( document.body ).on( "mousedown", ":not(#score-bar)", scoreBarToggleOff );
+	}
+
+	function initSettings() {
+		m_settings = JSON.parse( localStorage.getItem( "settings" ) );
+		if( m_settings === null ) {
+			m_settings = {
+				"draw": "One",
+				"scoring": "Standard",
+				"speed": "Normal",
+				"vegasStartScore": 0
+			};
+		}
+	}
+
+	function setVegasStartScore( score ) {
+		m_settings.vegasStartScore = score;
+		saveSettings();
+	}
+
+	function saveSettings() {
+		localStorage.setItem( "settings", JSON.stringify( m_settings ) );
+	}
+
+	function showMenu() {
+		g_sol.pause();
+		$( "#game-over" ).hide();
+		$( "#menu" ).slideToggle();
+		if( g_sol.isGameInProgress() ) {
+			$( "#btn-continue" ).show();
+		} else {
+			$( "#btn-continue" ).hide();
+		}
 	}
 
 	function resize( height ) {
@@ -133,28 +193,26 @@ let g_menu = ( function() {
 
 	function calcStats() {
 		let gameStats = JSON.parse( localStorage.getItem( "gameStats" ) );
-		/*
-  			gameStats.push( {
-			"date": ( new Date() ).getTime,
-			"mode": m_scoreMode,
-			"score": score,
-			"time": elapsed,
-			"deckCount": m_deckCount,
-			"isWin": isWin,
-			//"cards": m_undoStack[ 0 ]
-		} );
-  		*/
+		if( gameStats === null ) {
+			gameStats = [];
+		}
 		gameStats.sort( ( a, b ) => a.date - b.date );
 		let stdGp = 0;
 		let stdWin = 0;
 		let stdBest = 0;
 		let vegGp = 0;
 		let vegWin = 0;
-		let vegBest = 0;
-		let vegPeak = -9999;
+		let vegBest = -52;
+		let vegPeak = -52;
 		let vegCurrent = 0;
-		let $tbody = $( "#tbl-stats tbody" );
-		$tbody.html( "" );
+		let $window = $( window );
+		let isMobile = $window.height() < 550 || $window.width() < 565;
+
+		if( isMobile ) {
+			$( ".stats-table" ).hide();
+		} else {
+			buildTable( gameStats );
+		}
 		for( let i = 0; i < gameStats.length; i++ ) {
 			let game = gameStats[ i ];
 			if( game.mode === "Standard" ) {
@@ -178,14 +236,9 @@ let g_menu = ( function() {
 					vegPeak = vegCurrent;
 				}
 			}
-			let $tr = $( "<tr>" );
-			$tr.append( $( "<td>" ).append( g_util.formatDate( new Date( game.date ) ) ) );
-			$tr.append( $( "<td>" ).append( game.mode ) );
-			$tr.append( $( "<td>" ).append( game.score ) );
-			$tr.append( $( "<td>" ).append( game.elapsed ) );
-			$tr.append( $( "<td>" ).append( game.deckCount ) );
-			$tr.append( $( "<td>" ).append( game.isWin ) );
-			$tbody.append( $tr );
+			if( !isMobile ) {
+				buildTableRow( game );
+			}
 		}
 
 		$( "#std-gp" ).text( stdGp );
@@ -200,12 +253,69 @@ let g_menu = ( function() {
 		$( "#veg-win" ).text( vegWin );
 		$( "#veg-best" ).text( vegBest );
 		$( "#veg-peak" ).text( vegPeak );
-		$( "#veg-cur" ).text( vegCurrent );
+		if( g_sol.isGameInProgress() && g_sol.getScoreMode() === "Vegas" ) {
+			$( "#veg-cur" ).text( g_sol.getScore() );
+		} else {
+			$( "#veg-cur" ).text( m_settings.vegasStartScore );
+		}
 		if( vegGp > 0 ) {
 			$( "#veg-pct" ).text( vegWin / vegGp + "%" );
 		} else {
 			$( "#veg-pct" ).text( "" );
 		}
+
+		if( !isMobile && gameStats.length > 0 ) {
+			$( "#tbl-stats" ).dataTable( {
+	    		"paging": false,
+				"searching": false,
+				"scrollY": "200px",
+				"autoWidth": false,
+				"columns": [
+    				{ "width": "90px" },
+				   	null,
+					null,
+					null,
+					null,
+					null,
+					null
+				]
+			} );
+			setTimeout( function () {
+				$($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+			}, 250 );
+		}
+	}
+
+	function buildTable( gameStats ) {
+		let $tableContainer = $( ".stats-table" );
+		if( m_tableHtml === null ) {
+			m_tableHtml = $tableContainer.html();
+		} else {
+			$tableContainer.html( m_tableHtml );
+		}
+
+		if( gameStats.length === 0 ) {
+			$tableContainer.hide();
+		} else {
+			$tableContainer.show();
+		}
+	}
+
+	function buildTableRow( game ) {
+		let $tbody = $( "#tbl-stats tbody" );
+		let $tr = $( "<tr>" );
+		$tr.append( $( "<td>" ).append( g_util.formatDate( new Date( game.date ) ) ) );
+		$tr.append( $( "<td>" ).append( game.mode ) );
+		$tr.append( $( "<td>" ).append( game.draw ) );
+		$tr.append( $( "<td>" ).append( game.score ) );
+		$tr.append( $( "<td>" ).append( game.time.toFixed( 0 ) ) );
+		$tr.append( $( "<td>" ).append( game.deckCount ) );
+		let winText = "No";
+		if( game.isWin ) {
+			winText = "Yes";
+		}
+		$tr.append( $( "<td>" ).append( winText ) );
+		$tbody.append( $tr );
 	}
 })();
 

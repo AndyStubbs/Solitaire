@@ -1,5 +1,5 @@
 .button {
-	background-color: rgb(88 40 15 / 34%);
+	background-color: rgb(88 40 15 / 65%);
 	border: none;
 	color: white;
 	padding: 15px 32px;
@@ -69,12 +69,19 @@
 
 #menu #menu-stats {
 	display: none;
-	height: 500px;
 }
 
-.stats-data {
-	display: flex;
-    justify-content: center;
+@media screen and (min-height: 550px) {
+	#menu #menu-stats {
+		height: 500px;
+	}
+}
+
+@media screen and (min-width: 565px) {
+	.stats-data {
+		display: flex;
+    	justify-content: center;
+	}
 }
 
 .stats-data div {
@@ -92,6 +99,10 @@
     align-content: center;
     flex-wrap: wrap;
     flex-direction: column;
+}
+
+.dataTables_info {
+	display: none;
 }
 
 #menu-stats table {
@@ -195,7 +206,6 @@
     width: 50px;
     height: 50px;
     background-color: rgba(255,255,255,0.25);
-    /* rotate: 270deg; */
     line-height: 50px;
     padding: 0;
     color: darkmagenta;

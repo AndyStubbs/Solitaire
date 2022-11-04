@@ -15,7 +15,6 @@ let g_sol = ( function () {
 	let m_startTime = 0;
 	let m_timePrevious = 0;
 	let m_score = 0;
-	let m_vegasScore = null;
 	let m_drawMode = "One";
 	let m_scoreMode = "Standard";
 	let m_deckCount = 0;
@@ -30,7 +29,10 @@ let g_sol = ( function () {
 		"start": start,
 		"continueGame": continueGame,
 		"pause": pause,
-		"isGameInProgress": isGameInProgress
+		"isGameInProgress": isGameInProgress,
+		"endGame": endGame,
+		"getScoreMode": () => m_scoreMode,
+		"getScore": () => m_score
 	};
 
 	function init() {
@@ -42,6 +44,11 @@ let g_sol = ( function () {
 			m_undoStack = gameData.undoStack;
 			m_undoPointer = gameData.undoPointer;
 			m_timePrevious = gameData.elapsedTime;
+			if( gameData.undoStack.length > 0 ) {
+				m_score = gameData.undoStack[ gameData.undoStack.length - 1 ].score;
+			} else {
+				m_score = 0;
+			}
 		}
 	}
 
@@ -105,13 +112,20 @@ let g_sol = ( function () {
 
 	function pause() {
 		if( ! m_isPaused ) {
-			let t = ( new Date ).getTime();
-			let elapsed = ( t - m_startTime ) + m_timePrevious;
+			let elapsed = calcElapsedTime();
 			m_timePrevious = elapsed;
 		}
 		m_isPaused = true;
 		clearInterval( m_timeInterval );
 		clearInterval( m_winInterval );
+	}
+
+	function calcElapsedTime() {
+		let t = ( new Date ).getTime();
+		if( m_startTime === 0 ) {
+			m_startTime = t;
+		}
+		return ( t - m_startTime ) + m_timePrevious;
 	}
 
 	function isGameInProgress() {
@@ -122,7 +136,7 @@ let g_sol = ( function () {
  		Event Functions
  	*/
 
-	function mainDeckCardDealt() {	
+	function mainDeckCardDealt() {
 		mainDeckChecks();
 		saveState();
 	}
@@ -302,31 +316,41 @@ let g_sol = ( function () {
 	function checkForWin() {
 		if( $( "#suit-stacks .card" ).length === 52 ) {
 			endGame( true );
-			m_isRunning = false;
-			resetInput();
-			m_undoStack = [];
-			m_undoPointer = 0;
-			pause();
 			$( "#game-over" ).fadeIn();
 			m_winInterval = setInterval( winAnimation, 100 );
 		}
 	}
 
 	function endGame( isWin ) {
+		if( m_isRunning ) {
+			saveGame( isWin );	
+		}
+		m_isRunning = false;
+		resetInput();
+		m_undoStack = [];
+		m_undoPointer = 0;
+		m_deckCount = 0;
+		pause();
+		m_startTime = 0;
+		m_timePrevious = 0;
+		m_score = 0;
+	}
+
+	function saveGame( isWin ) {
 		let gameStats = JSON.parse( localStorage.getItem( "gameStats" ) );
 		if( gameStats === null ) {
 			gameStats = [];
 		}
-		let t = ( new Date ).getTime();
-		let elapsed = ( ( t - m_startTime ) + m_timePrevious ) / 1000;
-		let score = m_score;
+		let elapsed = calcElapsedTime() / 1000;
 		if( m_scoreMode === "Vegas" ) {
-			score = m_vegasScore - m_vegasStartScore;
+			m_score -= g_menu.getVegasStartScore();
+			g_menu.setVegasStartScore( m_score );
 		}
 		gameStats.push( {
 			"date": ( new Date() ).getTime(),
 			"mode": m_scoreMode,
-			"score": score,
+			"draw": m_drawMode,
+			"score": m_score,
 			"time": elapsed,
 			"deckCount": m_deckCount,
 			"isWin": isWin,
@@ -364,6 +388,7 @@ let g_sol = ( function () {
 		if( m_scoreMode === "Vegas" ) {
 			if( $( "#main-deck .card" ).length === 0 ) {
 				let $mainDeck = $( "#main-deck" );
+				$mainDeck.html( "" );
 				if( m_drawMode === "One" || m_deckCount === 2 ) {
 					g_ui.disableDeckClick( $mainDeck );
 					$mainDeck.css( "cursor", "default" );
@@ -375,6 +400,7 @@ let g_sol = ( function () {
 		} else {
 			if( $( "#main-deck .card" ).length === 0 ) {
 				let $mainDeck = $( "#main-deck" );
+				$mainDeck.html( "" );
 				if( $( "#main-pile .card" ).length === 0 ) {
 					g_ui.disableDeckClick( $mainDeck );
 					$mainDeck.css( "cursor", "default" );
@@ -397,11 +423,8 @@ let g_sol = ( function () {
 		if( m_scoreMode === "Standard" ) {
 			m_score = 0;
 		} else {
-			if( m_vegasScore === null ) {
-				m_vegasScore = 0;
-			}
-			m_vegasScore -= 52;
-			m_vegasStartScore = m_vegasScore;
+			m_score = g_menu.getVegasStartScore();
+			m_score -= 52;
 		}
 		updateScore( 0 );
 		$( "#timer" ).html( "Time: 0" );
@@ -556,26 +579,26 @@ let g_sol = ( function () {
 	}
 
 	function timeTick() {
-		let t = ( new Date ).getTime();
-		let elapsed = ( ( t - m_startTime ) + m_timePrevious ) / 1000;
+		let elapsed = calcElapsedTime() / 1000;
 		$( "#timer" ).html( "Time: " + elapsed.toFixed( 0 ) );
 	}
 
 	function updateScore( change ) {
-		var temp;
+		var temp, dollar;
+
+		m_score += change;
 
 		if( m_scoreMode === "Standard" ) {
-			m_score += change;
-			temp = m_score;
+			dollar = "";
 		} else {
-			m_vegasScore += change;
-			if( m_vegasScore < 0 ) {
-				temp = "<span style='color: red'>" + "-$" + Math.abs( m_vegasScore ) + "</span>";
-			} else {
-				temp = m_vegasScore;
-			}
+			dollar = "$";
 		}
-
+		if( m_score < 0 ) {
+			temp = "<span style='color: red'>" + "-" + dollar + Math.abs( m_score ) + "</span>";
+		} else {
+			temp = m_score;
+		}
+		
 		$( "#score" ).html( "Score: " + temp );
 	}
 
@@ -617,7 +640,6 @@ let g_sol = ( function () {
 	function saveState() {
 		let data = {
 			"score": m_score,
-			"vegasScore": m_vegasScore,
 			"deckCount": m_deckCount,
 			"cards": []
 		};
@@ -674,7 +696,6 @@ let g_sol = ( function () {
 			$( "#" + cardData.parentId ).append( $card );
 		}
 		m_score = data.score;
-		m_vegasScore = data.vegasScore;
 		m_deckCount = data.deckCount;		
 		mainDeckChecks();
 		updateScore( 0 );
@@ -683,8 +704,7 @@ let g_sol = ( function () {
 	}
 
 	function updateUndoStack() {
-		let t = ( new Date ).getTime();
-		let elapsedTime = ( t - m_startTime ) + m_timePrevious;
+		let elapsedTime = calcElapsedTime();
 		let gameData = {
 			"drawMode": m_drawMode,
 			"scoreMode": m_scoreMode,

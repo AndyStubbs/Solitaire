@@ -16,6 +16,7 @@ html, body {
 	color: #ffffff;
 	width: 100%;
 	top: 0px;
+	z-index: 9;
 }
 
 .score-row {
@@ -88,7 +89,7 @@ html, body {
 }
 
 .dragged-item {
-	z-index: 9;	
+	z-index: 8;	
 }
 
 .can-drop-card {
