@@ -211,6 +211,7 @@ let g_menu = ( function() {
 		if( isMobile ) {
 			$( ".stats-table" ).hide();
 		} else {
+			$( ".stats-table" ).show();
 			buildTable( gameStats );
 		}
 		for( let i = 0; i < gameStats.length; i++ ) {

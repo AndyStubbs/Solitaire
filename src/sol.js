@@ -72,6 +72,7 @@ let g_sol = ( function () {
 			cardMoved
 		);
 		g_ui.setSpeed( m_baseSpeed * m_speedFactor );
+		g_uiDrag.updateSpeed( m_speedPerPixel * m_speedFactor );
 		if( !isContinue ) {
 			g_ui.createDeck( g_cards.createDeck( true ), $( "#main-deck" ) );
 			dealDeck();
@@ -101,7 +102,9 @@ let g_sol = ( function () {
 
 	function continueGame( settings ) {
 		if( m_isRunning ) {
-			m_speedFactor = SPEED_FACTORS[ settings.speed ];		
+			m_speedFactor = SPEED_FACTORS[ settings.speed ];
+			g_ui.setSpeed( m_baseSpeed * m_speedFactor );
+			g_uiDrag.updateSpeed( m_speedPerPixel * m_speedFactor );
 			unpauseTime();
 		} else {
 			restoreState( m_undoStack[ m_undoStack.length - 1 ] );
