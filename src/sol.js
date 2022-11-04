@@ -225,9 +225,13 @@ let g_sol = ( function () {
 	}
 	
 	function onWindowResize() {
-		// TODO: Add a loading screen when resizing cards
 		clearTimeout( m_resizeTimeout );
 		m_resizeTimeout = setTimeout( resize, 100 );
+		if( g_util.isMobile() && !g_util.isFullscreen() ) {
+			$( "#btn-fullscreen" ).show();
+		} else {
+			$( "#btn-fullscreen" ).hide();
+		}
 	}
 
 	function onKeypress( e ) {

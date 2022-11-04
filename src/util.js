@@ -6,7 +6,8 @@ let g_util = (function() {
 		"areElementsOverlapped": areElementsOverlapped,
 		"findNearestElementFromList": findNearestElementFromList,
 		"formatDate": formatDate,
-		"padTo2Digits": padTo2Digits
+		"padTo2Digits": padTo2Digits,
+		"isFullscreen": isFullscreen
 	};
 
 	function isFunction( functionToCheck ) {
@@ -38,6 +39,18 @@ let g_util = (function() {
 			elem.msRequestFullscreen();
 		}
 	}
+
+	function isFullscreen() {
+		const windowWidth = window.innerWidth * window.devicePixelRatio;
+		const windowHeight = window.innerHeight * window.devicePixelRatio;
+		const screenWidth = window.screen.width;
+		const screenHeight = window.screen.height;
+
+		return (
+			( ( windowWidth / screenWidth ) >= 0.95 ) &&
+			( ( windowHeight / screenHeight ) >= 0.95 )
+		);
+  	}
 
 	function areElementsOverlapped( elem1, elem2 ) {
   		const rect1 = elem1.getBoundingClientRect();

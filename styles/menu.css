@@ -199,3 +199,19 @@
 	55% { opacity: 0.95; }
 	100% { opacity: 0; }
 }
+
+#btn-fullscreen {
+	display: block;
+	position: absolute;
+    left: 5px;
+    bottom: 5px;
+    color: white;
+    font-size: 42px;
+    width: 42px;
+    height: 42px;
+    line-height: 42px;
+    background-color: rgba(0,0,0,0.2);
+    z-index: 15;
+    padding: 0;
+    rotate: 90deg;
+}

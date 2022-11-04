@@ -20,6 +20,11 @@ let g_menu = ( function() {
 
 	function init() {
 		initSettings();
+		if( g_util.isMobile() && !g_util.isFullscreen() ) {
+			$( "#btn-fullscreen" ).show();
+		} else {
+			$( "#btn-fullscreen" ).hide();
+		}
 		$( "#loading-overlay" ).fadeOut();
 		g_sol.init();
 		if( !g_sol.isGameInProgress() ) {
@@ -42,6 +47,9 @@ let g_menu = ( function() {
 		$( "#btn-continue" ).on( "click", function () {
 			$( "#menu" ).slideToggle();
 			g_sol.continueGame( m_settings );
+			activateGameScreen();
+		} );
+		$( "#btn-fullscreen" ).on( "click", function () {
 			activateGameScreen();
 		} );
 		$( "#btn-settings" ).on( "click", function () {
@@ -99,6 +107,18 @@ let g_menu = ( function() {
 		} );
 		$( "#score-bar" ).on( "click", scoreBarClicked );
 		$( document.body ).on( "mousedown", ":not(#score-bar)", scoreBarToggleOff );
+		//document.addEventListener( "fullscreenchange", fullscreenchanged );
+		setInterval( fullscreenchanged, 1000 );
+	}
+
+	function fullscreenchanged() {
+		if( g_util.isFullscreen() ) {
+			$( "btn-fullscreen" ).hide();
+		} else {
+			if( g_util.isMobile() ) {
+				$( "btn-fullscreen" ).show();
+			}
+		}
 	}
 
 	function updateSettingsForm() {
@@ -161,6 +181,7 @@ let g_menu = ( function() {
 	function activateGameScreen() {
 		if( g_util.isMobile() ) {
 			g_util.openFullscreen( document.body );
+			$( "#btn-fullscreen" ).hide();
 			if ( "orientation" in screen ) {
 				screen.orientation.lock( "landscape-primary" );
 			}
