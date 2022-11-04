@@ -140,20 +140,20 @@ let g_menu = ( function() {
 	}
 
 	function resize( height ) {
-		if (height > 900) {
+		if( height > 900 ) {
 			m_menu.status = "default";
-			$("#score-toggle").hide();
-			$("#score-bar-placeholder").show();
-			$("#score-bar").css("top", 0);
+			$( "#score-toggle" ).hide();
+			$( "#score-bar-placeholder" ).show();
+			$( "#score-bar" ).css("top", 0 );
 		} else {
 			m_menu.status = "toggle";
-			$("#score-bar-placeholder").hide();
-			if (m_menu.state === "hidden") {
-				$("#score-toggle").show();
-				$("#score-bar").css("top", -48);
+			$( "#score-bar-placeholder" ).hide();
+			if( m_menu.state === "hidden" ) {
+				$( "#score-toggle" ).show();
+				$( "#score-bar" ).css( "top", -$( ".score-row" ).height() );
 			} else {
-				$("#score-toggle").hide();
-				$("#score-bar").css("top", 0);
+				$( "#score-toggle" ).hide();
+				$( "#score-bar" ).css( "top", 0 );
 			}
 		}
 	}
@@ -188,7 +188,7 @@ let g_menu = ( function() {
 			m_menu.state = "animating";
 			$("#score-toggle").slideToggle();
 			$("#score-bar").animate({
-				"top": -48
+				"top": -$( ".score-row" ).height()
 			}, 500, function() {
 				m_menu.state = "hidden";
 			});

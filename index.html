@@ -36,23 +36,23 @@
 			<p>
 				<label>Draw</label>
 				<select id="select-draw">
-					<option>One</option>
-					<option>Three</option>
+					<option value="One">One</option>
+					<option value="Three">Three</option>
 				</select>
 			</p>
 			<p>
 				<label>Scoring</label>
 				<select id="select-scoring">
-					<option>Standard</option>
-					<option>Vegas</option>
+					<option value="Standard">Standard</option>
+					<option value="Vegas">Vegas</option>
 				</select>
 			</p>
 			<p>
 				<label>Animation Speed</label>
 				<select id="select-speed">
-					<option>Slow</option>
-					<option selected>Normal</option>
-					<option>Fast</option>
+					<option value="Slow">Slow</option>
+					<option value="Normal">Normal</option>
+					<option value="Fast">Fast</option>
 				</select>
 			</p>
 			<input id="btn-ok" type="button" value="Ok" class="button" />
@@ -123,7 +123,6 @@
 		</div>
 		<div id="selected-cards"></div>
 		<div id="card-placeholder" class="card" style="display: none;"></div>
-		<input type="button" id="btn-undo" value="&#8634;" />
 	</div>
 	<div id="game-over">
 		<h1>You Win!</h1>
@@ -133,6 +132,7 @@
 			<div>
 				<input id="btn-menu" type="button" value="Menu" class="button" />
 				<input id="btn-end-game" type="button" value="End Game" class="button" />
+				<input id="btn-undo" type="button" value="Undo" class="button"/>
 			</div>
 			<span id="score">Score: 0</span>
 			<span id="timer">Time: 0</span>
