@@ -222,7 +222,7 @@ let g_menu = ( function() {
 			let game = gameStats[ i ];
 			if( game.mode === "Standard" ) {
 				stdGp += 1;
-				if( game.win ) {
+				if( game.isWin ) {
 					stdWin += 1;
 				}
 				if( game.score > stdBest ) {
@@ -230,7 +230,7 @@ let g_menu = ( function() {
 				}
 			} else {
 				vegGp += 1;
-				if( game.win ) {
+				if( game.isWin ) {
 					vegWin += 1;
 				}
 				if( game.score > vegBest ) {
@@ -250,9 +250,9 @@ let g_menu = ( function() {
 		$( "#std-win" ).text( stdWin );
 		$( "#std-best" ).text( stdBest );
 		if( stdGp > 0 ) {
-			$( "#std-pct" ).text( stdWin / stdGp + "%" );
+			$( "#std-pct" ).text( ( stdWin / stdGp * 100 ).toFixed( 0 ) + "%" );
 		} else {
-			$( "#std-pct" ).text( "" );
+			$( "#std-pct" ).text( "0%" );
 		}
 		$( "#veg-gp" ).text( vegGp );
 		$( "#veg-win" ).text( vegWin );
@@ -264,9 +264,9 @@ let g_menu = ( function() {
 			$( "#veg-cur" ).text( m_settings.vegasStartScore );
 		}
 		if( vegGp > 0 ) {
-			$( "#veg-pct" ).text( vegWin / vegGp + "%" );
+			$( "#veg-pct" ).text( ( vegWin / vegGp * 100 ).toFixed( 0 ) + "%" );
 		} else {
-			$( "#veg-pct" ).text( "" );
+			$( "#veg-pct" ).text( "0%" );
 		}
 
 		if( !isMobile && gameStats.length > 0 ) {
