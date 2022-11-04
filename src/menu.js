@@ -47,9 +47,7 @@ let g_menu = ( function() {
 		$( "#btn-settings" ).on( "click", function () {
 			$( "#menu-main" ).fadeTo( 300, 0 );
 			$( "#menu-settings" ).slideToggle();
-			$( "#select-draw" ).val( m_settings.draw );
-			$( "#select-scoring" ).val( m_settings.scoring );
-			$( "#select-speed" ).val( m_settings.speed );
+			updateSettingsForm();
 		} );
 		$( "#btn-stats" ).on( "click", function () {
 			calcStats();
@@ -101,6 +99,12 @@ let g_menu = ( function() {
 		} );
 		$( "#score-bar" ).on( "click", scoreBarClicked );
 		$( document.body ).on( "mousedown", ":not(#score-bar)", scoreBarToggleOff );
+	}
+
+	function updateSettingsForm() {
+		$( "#select-draw" ).val( m_settings.draw ).change();
+		$( "#select-scoring" ).val( m_settings.scoring ).change();
+		$( "#select-speed" ).val( m_settings.speed ).change();
 	}
 
 	function initSettings() {

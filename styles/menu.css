@@ -2,7 +2,8 @@
 	background-color: rgb(88 40 15 / 65%);
 	border: none;
 	color: white;
-	padding: 15px 32px;
+	margin-top: 2px;
+	padding: 12px;
 	text-align: center;
 	text-decoration: none;
 	display: inline-block;
@@ -29,6 +30,7 @@
 	color: white;
 	background-color: rgb(39, 27, 16);
 	background-image: url("../img/table.jpg");
+	overflow: auto;
 }
 
 #menu > div {
