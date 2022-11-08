@@ -217,7 +217,7 @@ let g_menu = ( function() {
 	}
 
 	function calcStats() {
-		let gameStats = JSON.parse( localStorage.getItem( "lol_gameStats" ) );
+		let gameStats = JSON.parse( localStorage.getItem( "sol_gameStats" ) );
 		if( gameStats === null ) {
 			gameStats = [];
 		}
