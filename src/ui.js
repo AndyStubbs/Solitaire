@@ -117,6 +117,7 @@ let g_ui = (function() {
 
 			// Make sure there is at least one card in the deck
 			if( $src.children().length === 0 ) {
+				animationCompleted( noDelay );
 				return;
 			}
 

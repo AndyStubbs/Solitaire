@@ -74,7 +74,7 @@ let g_menu = ( function() {
 		$( "#btn-reset" ).on( "click", function () {
 			if( confirm( "Are you sure you want to reset all your stats?" ) ) {
 				g_sol.endGame( false );
-				localStorage.removeItem( "gameStats" );
+				localStorage.removeItem( "sol_gameStats" );
 				$( "#menu-stats" ).fadeTo( 500, 0 );
 				setTimeout( () => {
 					$( "#menu-stats" ).fadeTo( 500, 1 );
@@ -128,7 +128,7 @@ let g_menu = ( function() {
 	}
 
 	function initSettings() {
-		m_settings = JSON.parse( localStorage.getItem( "settings" ) );
+		m_settings = JSON.parse( localStorage.getItem( "sol_settings" ) );
 		if( m_settings === null ) {
 			m_settings = {
 				"draw": "One",
@@ -145,7 +145,7 @@ let g_menu = ( function() {
 	}
 
 	function saveSettings() {
-		localStorage.setItem( "settings", JSON.stringify( m_settings ) );
+		localStorage.setItem( "sol_settings", JSON.stringify( m_settings ) );
 	}
 
 	function showMenu() {
@@ -217,7 +217,7 @@ let g_menu = ( function() {
 	}
 
 	function calcStats() {
-		let gameStats = JSON.parse( localStorage.getItem( "gameStats" ) );
+		let gameStats = JSON.parse( localStorage.getItem( "lol_gameStats" ) );
 		if( gameStats === null ) {
 			gameStats = [];
 		}

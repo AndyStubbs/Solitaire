@@ -36,7 +36,7 @@ let g_sol = ( function () {
 	};
 
 	function init() {
-		let gameData = JSON.parse( localStorage.getItem( "gameData" ) );
+		let gameData = JSON.parse( localStorage.getItem( "sol_gameData" ) );
 		if( gameData !== null ) {
 			m_drawMode = gameData.drawMode;
 			m_scoreMode = gameData.scoreMode;
@@ -344,7 +344,7 @@ let g_sol = ( function () {
 	}
 
 	function saveGame( isWin ) {
-		let gameStats = JSON.parse( localStorage.getItem( "gameStats" ) );
+		let gameStats = JSON.parse( localStorage.getItem( "sol_gameStats" ) );
 		if( gameStats === null ) {
 			gameStats = [];
 		}
@@ -363,7 +363,7 @@ let g_sol = ( function () {
 			"isWin": isWin,
 			//"cards": m_undoStack[ 0 ]
 		} );
-		localStorage.setItem( "gameStats", JSON.stringify( gameStats ) );
+		localStorage.setItem( "sol_gameStats", JSON.stringify( gameStats ) );
 	}
 
 	function winAnimation() {
@@ -720,7 +720,7 @@ let g_sol = ( function () {
 			"undoPointer": m_undoPointer,
 			"elapsedTime": elapsedTime
 		};
-		localStorage.setItem( "gameData", JSON.stringify( gameData ) );
+		localStorage.setItem( "sol_gameData", JSON.stringify( gameData ) );
 
 		// Clear the undo stack
 		$( "#undo-data" ).html( "" );
