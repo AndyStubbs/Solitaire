@@ -94,12 +94,19 @@ let g_menu = ( function() {
 			}, 500 );
 		} );
 		$( "#btn-ok" ).on( "click", function () {
-			m_settings.draw = $( "#select-draw" ).val();
-			m_settings.scoring = $( "#select-scoring" ).val();
-			m_settings.speed = $( "#select-speed" ).val();
-			saveSettings();
-			$( "#menu-main" ).fadeTo( 500, 1 );
-			$( "#menu-settings" ).slideToggle();
+			let draw = $( "#select-draw" ).val();
+			let scoring = $( "#select-scoring" ).val();
+			if(
+				g_sol.isGameInProgress() &&
+				( draw !== m_settings.draw || scoring !== m_settings.scoring )
+			) {
+				if( confirm( "Do you wish to end your current game to change settings?" ) ) {
+					g_sol.endGame( false );
+					getNewSettings();
+				}
+			} else {
+				getNewSettings();
+			}
 		} );
 		$( "#btn-cancel" ).on( "click", function () {
 			$( "#menu-main" ).fadeTo( 500, 1 );
@@ -109,6 +116,15 @@ let g_menu = ( function() {
 		$( document.body ).on( "mousedown", ":not(#score-bar)", scoreBarToggleOff );
 		//document.addEventListener( "fullscreenchange", fullscreenchanged );
 		setInterval( fullscreenchanged, 1000 );
+	}
+
+	function getNewSettings() {
+		m_settings.draw = $( "#select-draw" ).val();
+		m_settings.scoring = $( "#select-scoring" ).val();
+		m_settings.speed = $( "#select-speed" ).val();
+		saveSettings();
+		$( "#menu-main" ).fadeTo( 500, 1 );
+		$( "#menu-settings" ).slideToggle();
 	}
 
 	function fullscreenchanged() {
