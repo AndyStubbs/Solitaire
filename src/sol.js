@@ -350,8 +350,8 @@ let g_sol = ( function () {
 		}
 		let elapsed = calcElapsedTime() / 1000;
 		if( m_scoreMode === "Vegas" ) {
-			m_score -= g_menu.getVegasStartScore();
 			g_menu.setVegasStartScore( m_score );
+			m_score -= g_menu.getVegasStartScore();
 		}
 		gameStats.push( {
 			"date": ( new Date() ).getTime(),
