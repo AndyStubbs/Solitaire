@@ -103,6 +103,7 @@ let g_menu = ( function() {
 				if( confirm( "Do you wish to end your current game to change settings?" ) ) {
 					g_sol.endGame( false );
 					getNewSettings();
+					$( "#btn-continue" ).hide();
 				}
 			} else {
 				getNewSettings();
