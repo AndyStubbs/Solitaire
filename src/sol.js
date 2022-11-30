@@ -174,6 +174,10 @@ let g_sol = ( function () {
 	function stackClicked() {
 		var $card, $stack;
 
+		if( !g_ui.isReady() || !g_uiDrag.isReady() ) {
+			return;
+		}
+
 		$stack = $( this );
 		$card = $stack.children().last();
 		if ( $card.length > 0 && $card.hasClass( "card" ) && !$card.hasClass( "card-flipped" ) ) {
@@ -188,6 +192,9 @@ let g_sol = ( function () {
 	}
 
 	function cardClick() {
+		if( !g_ui.isReady() || !g_uiDrag.isReady() ) {
+			return;
+		}
 		if( m_doubleClicked ) {
 			cardDoubleClick( $( this ) );
 		}

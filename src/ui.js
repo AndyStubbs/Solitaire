@@ -17,8 +17,13 @@ let g_ui = (function() {
 		"setupDeckClick": setupDeckClick,
 		"disableDeckClick": disableDeckClick,
 		"setSpeed": setSpeed,
-		"reset": reset
+		"reset": reset,
+		"isReady": isReady
 	};
+
+	function isReady() {
+		return m_animations === 0;		
+	}
 
 	function createDeck( deck, $dest ) {
 		for( let i = 0; i < deck.length; i++ ) {

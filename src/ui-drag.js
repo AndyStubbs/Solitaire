@@ -19,8 +19,13 @@ let g_uiDrag = (function() {
 		"setupDragCards": setupDragCards,
 		"updateSpeed": updateSpeed,
 		"resetDrag": resetDrag,
-		"reset": reset
+		"reset": reset,
+		"isReady": isReady
 	};
+
+	function isReady() {
+		return !m_isAnimating && !m_isDragging;		
+	}
 
 	function setupDragCards( cardSelector, stackClass, speedPerPixel, canPlaceCardCmd, onCardPlacedCmd ) {
 		m_cardSelector = cardSelector;
