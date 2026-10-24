@@ -16,7 +16,7 @@
 
 ## Play Online
 You can play the game online at:  
-[Solitaire on Andy's Web Games](https://www.andyswebgames.com/games/solitaire)
+https://classic.andyswebgames.com/games/solitaire
 
 ---
 
